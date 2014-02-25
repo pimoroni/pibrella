@@ -164,9 +164,9 @@ class PinIterator:
 	# hand them off to each class instance
 	def __getattr__(self,name):
 		def handlerFunction(*args,**kwargs):
-			_results = []
+			_results = {}
 			for node in self._all:
-				_results.append( getattr(node,name)(*args) )
+				_results[node] =  getattr(node,name)(*args)
 
 			# Return the array of results
 			return _results
@@ -564,7 +564,7 @@ pibrella.output._add(g = Output(PB_PIN_OUTPUT_C))
 pibrella.output._add(h = Output(PB_PIN_OUTPUT_D))
 
 # And our button
-pibrella.button = pibrella.input.button
+pibrella.button = Button(PB_PIN_BUTTON)
 
 # And our buzzer
 pibrella.buzzer = Buzzer(PB_PIN_BUZZER)
