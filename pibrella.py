@@ -29,7 +29,7 @@ PB_PIN_BUZZER = 18
 PULSE_FPS = 50
 PULSE_FREQUENCY = 100
 
-DEBOUNCE_TIME = 300
+DEBOUNCE_TIME = 20
 
 # Basic wrapper around Thread to add Event
 # for stopping the execution loop and
@@ -147,33 +147,52 @@ class Pulse(StoppableThread):
 class PinIterator:
 
 	def __init__(self):
-		self._all = []
+		self._all = {}
+		self._index = []
 
 	# Support accessing with []
 	def __getitem__(self, key):
-		return self._all[key]
+		return self._all[self._index[key]]
 
 	def count(self):
 		return len(self._all)
 
-	def _add(self,obj):
+	def _add(self,name,obj):
 		# Handle adding additional items after init
-		self._all.append(obj)
+		self._all[name] = obj
+		self._index.append(name)
 
 	# Catch any calls to self.method_name and
 	# hand them off to each class instance
 	def __getattr__(self,name):
 		def handlerFunction(*args,**kwargs):
 			_results = {}
-			for node in self._all:
-				_results[node] =  getattr(node,name)(*args)
+			for node in self._index:
+				_results[node] =  getattr(self._all[node],name)(*args)
 
 			# Return the array of results
 			return _results
 
 		return handlerFunction
 
+	# Ask for a specific method to be run
+	# against all members of the Iterator
+	def _do(self,name,*args,**kwargs):
+		_results = {}
+		for node in self._index:
+			handler = getattr(self._all[node],name)
+			if hasattr(handler, '__call__'):
+				_results[node] = handler(*args)
+			else:
+				_results[node] = handler
+		return _results
+
 class Pins:
+
+	def __getattr__(self,name):
+		def handlerFunction(*args,**kwargs):
+			return self.all._do(name,*args,**kwargs)
+		return handlerFunction
 
 	def __init__(self, **kwargs):
 		self.all = PinIterator()
@@ -193,7 +212,7 @@ class Pins:
 			setattr(self, name, kwargs[name])
 
 			# Add the current light to the iterator for "all"
-			self.all._add(kwargs[name])
+			self.all._add(name,kwargs[name])
 
 # Pin contains methods that apply
 # to both inputs and outputs
@@ -573,16 +592,16 @@ pibrella.buzzer = Buzzer(PB_PIN_BUZZER)
 pibrella.pin = Pins()
 
 # Outputs
-pibrella.pin._add(out_e = pibrella.output.e)
-pibrella.pin._add(out_f = pibrella.output.f)
-pibrella.pin._add(out_g = pibrella.output.g)
-pibrella.pin._add(out_h = pibrella.output.h)
+pibrella.pin._add(e = pibrella.output.e)
+pibrella.pin._add(f = pibrella.output.f)
+pibrella.pin._add(g = pibrella.output.g)
+pibrella.pin._add(h = pibrella.output.h)
 
 # Inputs
-pibrella.pin._add(in_a  = pibrella.input.a)
-pibrella.pin._add(in_b  = pibrella.input.b)
-pibrella.pin._add(in_c  = pibrella.input.c)
-pibrella.pin._add(in_d  = pibrella.input.d)
+pibrella.pin._add(a  = pibrella.input.a)
+pibrella.pin._add(b  = pibrella.input.b)
+pibrella.pin._add(c  = pibrella.input.c)
+pibrella.pin._add(d  = pibrella.input.d)
 
 # Lights
 pibrella.pin._add(red   = pibrella.light.red)
