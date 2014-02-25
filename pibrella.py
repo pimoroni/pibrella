@@ -553,7 +553,7 @@ class Pibrella:
 # Set mode to use BCM pin numberings
 # TODO: Probably want to change this to board?
 GPIO.setmode(GPIO.BCM)
-#GPIO.setwarnings(False)
+GPIO.setwarnings(False)
 
 # Catch exit and make sure we clean up
 # before classes are too destroyed to do so
@@ -610,9 +610,6 @@ pibrella.pin._add(green = pibrella.light.green)
 
 # Button
 pibrella.pin._add(button = pibrella.button)
-
-# Fire up our worker
-# pibrellaworker._setup(pibrella)
 
 # Alias all the things!
 # This lets users "import pibrella" instead of "import pibrella from pibrella"

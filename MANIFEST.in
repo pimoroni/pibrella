@@ -1,0 +1,5 @@
+include pibrella.py
+include README.txt
+include CHANGELOG.txt
+include LICENSE.txt
+include setup.py
