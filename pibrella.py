@@ -1,4 +1,10 @@
-import sys, time, threading, thread, signal, atexit
+import sys, time, threading, signal, atexit
+
+try:
+	import thread
+except ImportError:
+	import _thread as thread
+
 import RPi.GPIO as GPIO
 
 # Pibrella Pins, these are BCM
@@ -304,7 +310,6 @@ class Output(Pin):
 	type = 'Output'
 
 	def __init__(self, pin):
-		#print "Setting " + str(pin) + " to OUTPUT"
 		GPIO.setup(pin, GPIO.OUT, initial=0)
 		super(Output,self).__init__(pin)
 		self.gpio_pwm = GPIO.PWM(pin,1)
@@ -510,7 +515,7 @@ class Pibrella:
 
 	def async_stop_all(self):
 		for worker in self.workers:
-			print "Stopping user task: " + worker
+			print("Stopping user task: " + worker)
 			self.workers[worker].stop()
 
 	def set_timeout(self,function,seconds):
@@ -537,18 +542,18 @@ class Pibrella:
 
 	# Exit cleanly
 	def exit(self):
-		print "\nPibrella exiting cleanly, please wait..."
+		print("\nPibrella exiting cleanly, please wait...")
 
-		print "Stopping flashy things..."
+		print("Stopping flashy things...")
 		self.pin.all.stop()
 
-		print "Stopping user tasks..."
+		print("Stopping user tasks...")
 		self.async_stop_all()
 
-		print "Cleaning up..."
+		print("Cleaning up...")
 		GPIO.cleanup()
 
-		print "Goodbye!"
+		print("Goodbye!")
 
 # Set mode to use BCM pin numberings
 # TODO: Probably want to change this to board?
