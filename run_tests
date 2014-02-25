@@ -1,7 +1,0 @@
-#!/bin/sh
-echo "\n\nTesting Iterator"
-sudo python test/iterator.py
-echo "\n\nTesting Inputs"
-sudo python test/input.py
-echo "\n\nTesting Button"
-sudo python test/button.py

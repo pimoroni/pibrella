@@ -1,0 +1,19 @@
+#!/bin/sh
+
+echo "\n\n\nPython 2"
+
+echo "\n\nTesting Iterator"
+sudo python2 iterator.py
+echo "\n\nTesting Inputs"
+sudo python2 input.py
+echo "\n\nTesting Button"
+sudo python2 button.py
+
+echo "\n\n\nPython 3"
+
+echo "\n\nTesting Iterator"
+sudo python3 iterator.py
+echo "\n\nTesting Inputs"
+sudo python3 input.py
+echo "\n\nTesting Button"
+sudo python3 button.py
