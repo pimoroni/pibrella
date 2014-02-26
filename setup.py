@@ -37,10 +37,11 @@ setup(name		= 'Pibrella',
 	author		= 'Philip Howard',
 	author_email	= 'phil@gadgetoid.com',
 	description	= 'A module to control the Pibrella Raspberry Pi Addon Board',
-	long_description= open('README.txt').read() + open('CHANGELOG.txt').read(),
+	long_description= open('README.md').read() + open('CHANGELOG.txt').read(),
 	license		= 'MIT',
 	keywords	= 'Raspberry Pi Pibrella',
 	url		= 'http://www.pibrella.com',
 	classifiers     = classifiers,
 	py_modules	= ['pibrella'],
+	install_requires= ['rpi.gpio >= 0.5.4']
 )

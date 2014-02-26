@@ -1,4 +1,5 @@
 include pibrella.py
+include README.md
 include README.txt
 include CHANGELOG.txt
 include LICENSE.txt

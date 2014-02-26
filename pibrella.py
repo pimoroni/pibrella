@@ -275,7 +275,7 @@ class Input(Pin):
 	def on_low(self, callback, bouncetime=DEBOUNCE_TIME):
 		def handle_callback(pin):
 			callback(self)
-		GPIO.add_event_detect(self.pin, GPIO.RISING, callback=handle_callback, bouncetime=bouncetime)
+		GPIO.add_event_detect(self.pin, GPIO.FALLING, callback=handle_callback, bouncetime=bouncetime)
 		
 	def on_changed(self, callback, bouncetime=DEBOUNCE_TIME):
 		def handle_callback(pin):
