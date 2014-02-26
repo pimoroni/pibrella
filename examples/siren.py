@@ -31,12 +31,12 @@ pibrella.async_start('siren',siren)
 def start_siren():
 	global siren_stopped
 	siren_stopped = False
-	pibrella.light.all.pulse(TIME_ON, TIME_OFF, FADE_ON, FADE_OFF)
+	pibrella.light.pulse(TIME_ON, TIME_OFF, FADE_ON, FADE_OFF)
 
 def stop_siren():
 	global siren_stopped
 	siren_stopped = True
-	pibrella.light.all.stop()
+	pibrella.light.stop()
 
 def handle_button(button):
 	global siren_stopped

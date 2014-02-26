@@ -128,44 +128,48 @@ class Pulse(StoppableThread):
 
 		self.pin.duty_cycle( 0 )
 
-
-## Provies an "all" method to Pins collections
+## Pins container, represents a collection of pins
 #
-#  Allows arbitrary function calls to be
-#  remapped to each member of the collection
-class PinIterator:
+#  Allows multiple named attributes to be added
+#  to produce a clean and tidy API
+class Pins:
 
-	def __init__(self):
+	def __init__(self, **kwargs):
 		self._all = {}
 		self._index = []
+		for name in kwargs:
+				self._add_single(name,kwargs[name])
 
-	# Support accessing with []
-	def __getitem__(self, key):
-		return self._all[self._index[key]]
+	##  Allows pibrella.collection to return a list of members
+	def __repr__(self):
+		return str(', '.join( self._all.keys() ))
 
-	def count(self):
-		return len(self._all)
+	def __str__(self):
+		return ', '.join( self._all.keys() )
 
-	def _add(self,name,obj):
-		# Handle adding additional items after init
-		self._all[name] = obj
-		self._index.append(name)
-
-	# Catch any calls to self.method_name and
-	# hand them off to each class instance
+	## Returns a pin, if its found by name,
+	#  otherwise tries to run the named function against all pins
 	def __getattr__(self,name):
-		def handlerFunction(*args,**kwargs):
-			_results = {}
-			for node in self._index:
-				_results[node] =  getattr(self._all[node],name)(*args)
+		# Return the pin if we have it
+		if name in self._all.keys():
+			return self._all[name]
+		# Otherwise try to run against all pins
+		else:
+			def handlerFunction(*args,**kwargs):
+				return self._do(name,*args,**kwargs)
+			return handlerFunction
 
-			# Return the array of results
-			return _results
+	## Support accessing with [n]
+	def __getitem__(self, key):
+		if isinstance(key,int):
+			return self._all[self._index[key]]
+		else:
+			return self._all[key]
 
-		return handlerFunction
-
+	## Runs a function against all registered pins
+	#
 	# Ask for a specific method to be run
-	# against all members of the Iterator
+	# against all added pins
 	def _do(self,name,*args,**kwargs):
 		_results = {}
 		for node in self._index:
@@ -176,36 +180,17 @@ class PinIterator:
 				_results[node] = handler
 		return _results
 
-## Pins container, represents a collection of pins
-#
-#  Allows multiple named attributes to be added
-#  to produce a clean and tidy API
-class Pins:
-
-	def __getattr__(self,name):
-		def handlerFunction(*args,**kwargs):
-			return self.all._do(name,*args,**kwargs)
-		return handlerFunction
-
-	def __init__(self, **kwargs):
-		self.all = PinIterator()
-		self._add(**kwargs)
-
-	# Support accessing with [n]
-	def __getitem__(self, key):
-		return self.all[key]
-
 	def count(self):
 		return self.all.count()
 
-	def _add(self, **kwargs):
+	def _add(self,**kwargs):
 		for name in kwargs:
+				self._add_single(name,kwargs[name])
 
-			# Make the light available as an attribute of the pins instance
-			setattr(self, name, kwargs[name])
-
-			# Add the current light to the iterator for "all"
-			self.all._add(name,kwargs[name])
+	def _add_single(self,name,obj):
+		# Handle adding additional items after init
+		self._all[name] = obj
+		self._index.append(name)
 
 ## Pibrella class representing a GPIO Pin
 #
@@ -262,16 +247,19 @@ class Input(Pin):
 		def handle_callback(pin):
 			callback(self)
 		GPIO.add_event_detect(self.pin, GPIO.RISING, callback=handle_callback, bouncetime=bouncetime)
+		return True
 
 	def on_low(self, callback, bouncetime=DEBOUNCE_TIME):
 		def handle_callback(pin):
 			callback(self)
 		GPIO.add_event_detect(self.pin, GPIO.FALLING, callback=handle_callback, bouncetime=bouncetime)
+		return True
 		
 	def on_changed(self, callback, bouncetime=DEBOUNCE_TIME):
 		def handle_callback(pin):
 			callback(self)
 		GPIO.add_event_detect(self.pin, GPIO.BOTH, callback=handle_callback, bouncetime=bouncetime)
+		return True
 
 	def clear_events(self):
 		GPIO.remove_event_detect(self.pin)
@@ -317,28 +305,35 @@ class Output(Pin):
 		self.gpio_pwm.ChangeDutyCycle(duty_cycle)
 		self.gpio_pwm.ChangeFrequency(freq)
 		self.gpio_pwm.start(duty_cycle)
+		return True
 
 	def frequency(self,freq):
 		self.gpio_pwm.ChangeFrequency(freq)
+		return True
 
 	def duty_cycle(self,duty_cycle):
 		self.gpio_pwm.ChangeDutyCycle(duty_cycle)
+		return True
 
 	def stop(self):
 		self.gpio_pwm.stop()
+		return True
 
 	def write(self,value):
 		GPIO.output(self.pin,value)
+		return True
 
 	def on(self):
 		self.duty_cycle(100)
 		self.gpio_pwm.stop()
 		self.write(1)
+		return True
 
 	def off(self):
 		self.duty_cycle(0)
 		self.gpio_pwm.stop()
 		self.write(0)
+		return True
 
 	# Alias on/off to conventional names
 	high = on
@@ -389,6 +384,8 @@ class Light(Output):
 		else:
 			self.pwm(1.0/total,duty_cycle)
 			self.blinking = True
+
+		return True
 	
 	## Pulses an LED
 	#  @param self Object pointer.
@@ -431,6 +428,8 @@ class Light(Output):
 			self.pulsing = True
 
 		self.blinking = True
+
+		return True
 
 	## Turns an LED on
 	#  @param self Object pointer.
@@ -481,6 +480,7 @@ class Light(Output):
 		# Threaded PWM access was aborting with
 		# no errors when stop coincided with a
 		# duty cycle change.
+		return True
 
 ## Pibrella class representing a buzzer
 #
@@ -497,7 +497,9 @@ class Buzzer(Output):
 	def note(self,note):
 		note = float(note)
 		a = pow(2.0, 1.0/12.0)
-		self.buzz(440.00 * pow(a,note))
+		f = 440.00 * pow(a,note)
+		self.buzz(f)
+		return True
 
 	# Example sound effects
 	def success(self):
@@ -511,6 +513,7 @@ class Buzzer(Output):
 			return False
 		async = AsyncWorker(success)
 		async.start()
+		return True
 
 	def fail(self):
 		def fail():
@@ -523,6 +526,7 @@ class Buzzer(Output):
 			return False
 		async = AsyncWorker(fail)
 		async.start()
+		return True
 
 class Pibrella:
 	light = None
@@ -537,14 +541,17 @@ class Pibrella:
 	def async_start(self,name,function):
 		self.workers[name] = AsyncWorker(function)
 		self.workers[name].start()
+		return True
 
 	def async_stop(self,name):
 		self.workers[name].stop()
+		return True
 
 	def async_stop_all(self):
 		for worker in self.workers:
 			print("Stopping user task: " + worker)
 			self.workers[worker].stop()
+		return True
 
 	def set_timeout(self,function,seconds):
 		def fn_timeout():
@@ -553,6 +560,7 @@ class Pibrella:
 			return False
 		timeout = AsyncWorker(fn_timeout)
 		timeout.start()
+		return True
 
 	# Should this ever be exposed to the user?
 	def pause(self):
@@ -567,13 +575,14 @@ class Pibrella:
 	# Stop a running loop
 	def stop(self):
 		self.running = False
+		return True
 
 	# Exit cleanly
 	def exit(self):
 		print("\nPibrella exiting cleanly, please wait...")
 
 		print("Stopping flashy things...")
-		self.pin.all.stop()
+		self.pin.stop()
 
 		print("Stopping user tasks...")
 		self.async_stop_all()
@@ -640,6 +649,9 @@ pibrella.pin._add(d  = pibrella.input.d)
 pibrella.pin._add(red   = pibrella.light.red)
 pibrella.pin._add(amber = pibrella.light.amber)
 pibrella.pin._add(green = pibrella.light.green)
+
+# Buzzer
+pibrella.pin._add(buzzer= pibrella.buzzer)
 
 # Button
 pibrella.pin._add(button = pibrella.button)

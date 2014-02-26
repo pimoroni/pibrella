@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+1.1-dev
+- Removed *.all.* keyword, use pibrella.input.read() instead of pibrella.input.all.read()
+- Added helper to list pins, try: pibrella.input in interactive shell
+- Added ['name'] and [idx] support to pin collections, try: pibrella.input[0] pibrella.input['a']
+- Added buzzer to pibrella.pin
+- Added return values to most methods
+
 1.0-dev
 -------
 - Initial development/beta release
