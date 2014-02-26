@@ -1,3 +1,9 @@
+## @package Pibrella
+#  API library for the Pibralla, a Raspberry Pi add-on board
+"""[pibrella]
+
+API library for the Pibrella, a Raspberry Pi add-on board
+"""
 import sys, time, threading, signal, atexit
 
 try:
@@ -37,9 +43,10 @@ PULSE_FREQUENCY = 100
 
 DEBOUNCE_TIME = 20
 
-# Basic wrapper around Thread to add Event
-# for stopping the execution loop and
-# exiting cleanly.
+## Basic stoppable thread wrapper
+#
+#  Adds Event for stopping the execution loop
+#  and exiting cleanly.
 class StoppableThread(threading.Thread):
 	def __init__(self):
 		threading.Thread.__init__(self)
@@ -58,9 +65,11 @@ class StoppableThread(threading.Thread):
 			# block calling thread until thread really has terminated
 			self.join()
 
-# Basic thread wrapper class for running functions
-# asyncronously. Return False from your function
-# to abort looping.
+## Basic thread wrapper class for asyncronously running functions
+#
+#  Basic thread wrapper class for running functions
+#  asyncronously. Return False from your function
+#  to abort looping.
 class AsyncWorker(StoppableThread):
 	def __init__(self, todo):
 		StoppableThread.__init__(self)
@@ -71,7 +80,10 @@ class AsyncWorker(StoppableThread):
 			if self.todo() == False:
 				break
 
-
+## Basic thread wrapper class for delta-timed LED pulsing
+#
+#  Pulses an LED in perfect wall-clock time
+#  Small delay by 1.0/FPS to prevent unecessary workload
 class Pulse(StoppableThread):
 	def __init__(self,pin,time_on,time_off,transition_on,transition_off):
 		StoppableThread.__init__(self)
@@ -116,40 +128,11 @@ class Pulse(StoppableThread):
 
 		self.pin.duty_cycle( 0 )
 
-	# This alternative uses tighter loops, but
-	# any interruption can cause simultaneously started
-	# pulses to desyncronise quite obviously
-	def dont_run(self):
-		while self.stop_event.is_set() == False:
-			if self.transition_on > 0:
-				for x in xrange(0, 100):
-					if self.stop_event.is_set():
-						break
-					self.pin.duty_cycle(x)
-					time.sleep(float(self.transition_on)/100)
-			else:
-				self.pin.duty_cycle(100)
 
-			for x in xrange(0, 1000):
-				time.sleep(self.time_on/1000)
-				if self.stop_event.is_set():
-					break
-
-			if self.transition_off > 0:
-				for x in reversed(xrange(0, 100)):
-					if self.stop_event.is_set():
-						break
-					self.pin.duty_cycle(x)
-					time.sleep(float(self.transition_off)/100)
-			else:
-				self.pin.duty_cycle(0)
-
-			for x in xrange(0, 1000):
-				time.sleep(self.time_off/1000)
-				if self.stop_event.is_set():
-					break
-
-# Provies an "all" method to Pins collections
+## Provies an "all" method to Pins collections
+#
+#  Allows arbitrary function calls to be
+#  remapped to each member of the collection
 class PinIterator:
 
 	def __init__(self):
@@ -193,6 +176,10 @@ class PinIterator:
 				_results[node] = handler
 		return _results
 
+## Pins container, represents a collection of pins
+#
+#  Allows multiple named attributes to be added
+#  to produce a clean and tidy API
 class Pins:
 
 	def __getattr__(self,name):
@@ -220,8 +207,10 @@ class Pins:
 			# Add the current light to the iterator for "all"
 			self.all._add(name,kwargs[name])
 
-# Pin contains methods that apply
-# to both inputs and outputs
+## Pibrella class representing a GPIO Pin
+#
+#  Pin contains methods that apply
+#  to both inputs and outputs
 class Pin(object):
 	type = 'Pin'
 
@@ -254,8 +243,10 @@ class Pin(object):
 	is_low = is_off
 	get = read
 
-# Input contains methods that
-# apply only to inputs
+## Pibrella class representing a GPIO Input
+#
+#  Input contains methods that
+#  apply only to inputs
 class Input(Pin):
 
 	type = 'Input'
@@ -290,6 +281,10 @@ class Input(Pin):
 	pressed = on_high
 	released = on_low
 
+## Pibrella class representing a Button
+#
+#  Contains is_pressed and is_released aliases
+#  that provide button related methods
 class Button(Input):
 
 	type = 'Button'
@@ -303,8 +298,10 @@ class Button(Input):
 	def is_released(self):
 		return self.is_off()
 
-# Output contains methods that
-# apply only to outputs
+## Pibrella class representing a GPIO Output
+#
+#  Output contains methods that
+#  apply only to outputs
 class Output(Pin):
 
 	type = 'Output'
@@ -353,6 +350,9 @@ class Output(Pin):
 		else:
 			self.write(1)
 
+## Pibrella class representing an onboard LED
+#
+# Light contains methods for pulsing, blinking LEDs
 class Light(Output):
 
 	type = 'Light'
@@ -363,6 +363,10 @@ class Light(Output):
 		self.blinking = False
 		self.pulsing = False
 
+	## Blinks an LED by working out the correct PWM frequency/duty cycle
+	#  @param self Object pointer.
+	#  @param on Time the LED should stay at 100%/on
+	#  @param off Time the LED should stay at 0%/off
 	def blink(self,on=1,off=-1):
 		if off == -1:
 			off = on
@@ -385,19 +389,30 @@ class Light(Output):
 		else:
 			self.pwm(1.0/total,duty_cycle)
 			self.blinking = True
-
-	def pulse(self,time_on=-1,time_off=-1,transition_on=-1,transition_off=-1):
+	
+	## Pulses an LED
+	#  @param self Object pointer.
+	#  @param transition_on Time the transition from 0% to 100% brightness should take
+	#  @param transition_off Time the trantition from 100% to 0% brightness should take
+	#  @param time_on Time the LED should stay at 100% brightness
+	#  @param time_off Time the LED should stay at 0% brightness
+	def pulse(self,transition_on=None,transition_off=None,time_on=None,time_off=None):
 		# This needs a thread to handle the fade in and out
 
-		if time_off == -1:
-			time_off = time_on
+		# Attempt to cascade parameters
+		# pulse() = pulse(0.5,0.5,0.5,0.5)
+		# pulse(0.5,1.0) = pulse(0.5,1.0,0.5,0.5)
+		# pulse(0.5,1.0,1.0) = pulse(0.5,1.0,1.0,1.0)
+		# pulse(0.5,1.0,1.0,0.5) = -
 
-		if transition_off == -1 and transition_on > -1:
+		if transition_on == None:
+			transition_on = 0.5
+		if transition_off == None:
 			transition_off = transition_on
-
-		if transition_on == -1:
-			transition_on = time_on
-			transition_off = time_on
+		if time_on == None:
+			time_on = transition_on
+		if time_off == None:
+			time_off = transition_on
 
 		# Fire up PWM if it's not running
 		if self.blinking == False:
@@ -417,6 +432,11 @@ class Light(Output):
 
 		self.blinking = True
 
+	## Turns an LED on
+	#  @param self Object pointer.
+	#
+	#  Includes handling of pulsing/blinking functions
+	#  which must be stopped before turning on
 	def on(self):
 		# Some gymnastics here to fix a big ( in RPi.GPIO?)
 		# That occurs when trying to output(1) immediately
@@ -429,6 +449,11 @@ class Light(Output):
 		return super(Light,self).on()
 	high = on
 
+	## Turns an LED off
+	#  @param self Object pointer.
+	#
+	#  Includes handling of pulsing/blinking functions
+	#  which must be stopped before turning off
 	def off(self):
 		# Obviously stop blinking and/or pulsing if we're
 		# turning this light off
@@ -436,11 +461,14 @@ class Light(Output):
 		return super(Light,self).off()
 	low = off
 
+	## Stops the pulsing thread
+	#  @param self Object pointer.
 	def stop_pulse(self):
 		self.pulsing = False
 		self.pulser.stop()
 		self.pulser = Pulse(self,0,0,0,0)
 
+	## Stops the pulsing thread
 	def stop(self):
 		self.blinking = False
 		self.stop_pulse()
@@ -454,9 +482,9 @@ class Light(Output):
 		# no errors when stop coincided with a
 		# duty cycle change.
 
-		#time.sleep(0.001)
-		#super(Light,self).stop()
-
+## Pibrella class representing a buzzer
+#
+#  Includes tone/tune generation methods
 class Buzzer(Output):
 
 	type = 'Buzzer'
