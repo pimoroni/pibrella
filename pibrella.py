@@ -357,6 +357,26 @@ class Light(Output):
 		self.pulser = Pulse(self,0,0,0,0)
 		self.blinking = False
 		self.pulsing = False
+		self.fader = None
+
+	## Fades an LED to a specific brightness over a specific time
+	def fade(self,start,end,duration):
+		self.stop()
+		time_start = time.time()
+		self.pwm(PULSE_FREQUENCY,start)
+		def _fade():
+			if time.time() - time_start >= duration:
+				self.duty_cycle(end)
+				return False
+			
+			current = (time.time() - time_start) / duration
+			brightness = start + (float(end-start) * current)
+			self.duty_cycle(round(brightness))
+			time.sleep(0.1)
+			
+		self.fader = AsyncWorker(_fade)
+		self.fader.start()
+		return True
 
 	## Blinks an LED by working out the correct PWM frequency/duty cycle
 	#  @param self Object pointer.
@@ -469,6 +489,9 @@ class Light(Output):
 
 	## Stops the pulsing thread
 	def stop(self):
+		if self.fader != None:
+			self.fader.stop()
+
 		self.blinking = False
 		self.stop_pulse()
 

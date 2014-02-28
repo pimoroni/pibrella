@@ -56,6 +56,11 @@ The astute observer will realise that these are equivilent:
     pibrella.light.red.pulse(0, 0, 1, 1)
     pibrella.light.red.blink(1, 1)
 
+You can also fade LEDs from one brightness to another, like so:
+
+    pibrella.light.red.fade(0, 100, 2) # From 0 to 100% in 2 seconds
+
+
 Inputs and outputs
 ------------------
 
