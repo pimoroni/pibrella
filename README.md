@@ -1,11 +1,30 @@
 Pibrella
 ========
 
-Support code and API libreary for the Pibrella addon board.
+Support code and API library for the Pibrella addon board.
+
+Installation
+============
+
+The easy way, just:
+
+    pip install pibrella
+
+Alternatively you can clone this repository and install:
+
+    git clone http://github.com/pimoroni/pibrella
+    cd pibrella
+    sudo python setup.py install
+
+To try the examples:
+
+    git clone http://github.com/pimoroni/pibrella
+    cd pibrella/examples
+    sudo python siren.py
+
 
 Usage
 =====
-
 
 Run as root!
 ------------
