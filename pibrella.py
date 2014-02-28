@@ -14,7 +14,11 @@ except ImportError:
 import RPi.GPIO as GPIO
 
 # Pibrella Pins, these are BCM
-PB_PIN_LIGHT_RED   = 27 # 21 on Rev 1
+if GPIO.RPI_REVISION == 1:
+	PB_PIN_LIGHT_RED   = 21 # 21 on Rev 1
+else:
+	PB_PIN_LIGHT_RED = 27
+
 PB_PIN_LIGHT_AMBER = 17
 PB_PIN_LIGHT_GREEN = 4
 

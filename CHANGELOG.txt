@@ -1,7 +1,16 @@
 Change Log
 ==========
 
+1.1.2-dev
+---------
+- Added support for REV 1 Raspberry Pi
+
+1.1.1-dev
+---------
+- Added fade(from,to,duration) for lights
+
 1.1-dev
+-------
 - Removed *.all.* keyword, use pibrella.input.read() instead of pibrella.input.all.read()
 - Added helper to list pins, try: pibrella.input in interactive shell
 - Added ['name'] and [idx] support to pin collections, try: pibrella.input[0] pibrella.input['a']
