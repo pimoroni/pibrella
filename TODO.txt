@@ -1,0 +1,13 @@
+TODO
+====
+
+Features
+--------
+
+- More sounds!
+- Intro/Help functionality
+
+Improvements
+------------
+
+- Rewrite buzzer.success() and buzzer.fail() to use deltatime

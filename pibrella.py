@@ -516,6 +516,10 @@ class Buzzer(Output):
 
 	type = 'Buzzer'
 
+	def __init__(self,pin):
+		self._melody = None
+		super(Buzzer,self).__init__(pin)
+
 	def buzz(self,frequency):
 		self.pwm(frequency,30)
 
@@ -530,30 +534,74 @@ class Buzzer(Output):
 
 	# Example sound effects
 	def success(self):
+		# Stop any current sound
+		self.stop()
 		def success():
-			for note in xrange(0,4):
+			for note in range(0,4):
 				self.note(note)
 				time.sleep(0.2)
 			time.sleep(0.4)
-			self.stop()
+
+			# Stop using the parent stop
+			# method since this one
+			# tries to stop the thread!
+			super(Buzzer,self).stop()
+
 			# Prevent looping
 			return False
-		async = AsyncWorker(success)
-		async.start()
+		self._melody = AsyncWorker(success)
+		self._melody.start()
 		return True
 
 	def fail(self):
+		# Stop any current sound
+		self.stop()
 		def fail():
-			for note in reversed(xrange(0,5)):
+			for note in reversed(range(0,5)):
 				self.note(note)
 				time.sleep(0.2)
 			time.sleep(0.4)
-			self.stop()
+			
+			super(Buzzer,self).stop()
+
 			# Prevent looping
 			return False
-		async = AsyncWorker(fail)
-		async.start()
+		self._melody = AsyncWorker(fail)
+		self._melody.start()
 		return True
+
+	def alarm(self):
+		self.stop()
+		time_start = time.time()
+
+		# Notes to play
+		notes = range(-30,30)
+
+		# Duration of each note
+		duration = 0.01
+
+		# Total duration of melody
+		total = len(notes) * duration
+
+		def alarm():
+			now = time.time() - time_start
+			delta = round( (now % total) / duration )
+						
+			note = notes[int(delta)-1]
+	
+			pibrella.buzzer.note(note)
+			
+			time.sleep(0.005)
+			
+		self._melody = AsyncWorker(alarm)
+		self.fps = 100
+		self._melody.start()
+
+	def stop(self):
+		if self._melody != None:
+			self._melody.stop()
+		return super(Buzzer,self).stop()
+		
 
 class Pibrella:
 	light = None
