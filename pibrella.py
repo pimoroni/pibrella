@@ -570,6 +570,26 @@ class Buzzer(Output):
 		self._melody.start()
 		return True
 
+	def melody(self,notes,duration = 0.5):
+		self.stop()
+		time_start = time.time()
+
+		total = len(notes) * duration
+
+		def melody():
+			now = time.time() - time_start
+			delta = round( (now % total) / duration )
+			
+			note = notes[int(delta)-1]
+			
+			pibrella.buzzer.note(note)
+
+			time.sleep(0.005)
+
+		self._melody = AsyncWorker(melody)
+		self.fps = 100
+		self._melody.start()
+
 	def alarm(self):
 		self.stop()
 		time_start = time.time()
