@@ -534,88 +534,64 @@ class Buzzer(Output):
 
 	# Example sound effects
 	def success(self):
-		# Stop any current sound
-		self.stop()
-		def success():
-			for note in range(0,4):
-				self.note(note)
-				time.sleep(0.2)
-			time.sleep(0.4)
-
-			# Stop using the parent stop
-			# method since this one
-			# tries to stop the thread!
-			super(Buzzer,self).stop()
-
-			# Prevent looping
-			return False
-		self._melody = AsyncWorker(success)
-		self._melody.start()
+		# Repeat the last note to extend its duration
+		self.melody([0,1,2,3,3,3,3,3],0.2,False)
 		return True
 
 	def fail(self):
-		# Stop any current sound
-		self.stop()
-		def fail():
-			for note in reversed(range(0,5)):
-				self.note(note)
-				time.sleep(0.2)
-			time.sleep(0.4)
-			
-			super(Buzzer,self).stop()
-
-			# Prevent looping
-			return False
-		self._melody = AsyncWorker(fail)
-		self._melody.start()
+		# Repeat the last note to extend its duration
+		self.melody([5,4,3,2,1,1,1,1,1],0.2,False)
 		return True
 
-	def melody(self,notes,duration = 0.5):
+	def melody(self,notes,duration = 0.5,loop = True):
 		self.stop()
 		time_start = time.time()
 
+		if duration <= 0.0001:
+			raise ValueError('Duration must be greater than 0.0001')
+
+		if len(notes) == 0:
+			raise ValueError('You must provide at least one note')
+
+		# Get the total length of the tune
+		# so we can play it!
 		total = len(notes) * duration
 
 		def melody():
+			
 			now = time.time() - time_start
+			
+			# Play only once if loop is false
+			if loop == False and int(now / total) > 0:
+				super(Buzzer,self).stop()
+				return False
+
+			# Figure out how far we are into the current iteration
+			# Then divide by duration to find the current note index
 			delta = round( (now % total) / duration )
 			
+			# Select the note from the notes array
 			note = notes[int(delta)-1]
 			
-			pibrella.buzzer.note(note)
-
-			time.sleep(0.005)
+			if note == '-':
+				super(Buzzer,self).stop()
+			else:
+				# Play the note
+				pibrella.buzzer.note(note)
+	
+			# Sleep a bit
+			time.sleep(0.0001)
 
 		self._melody = AsyncWorker(melody)
 		self.fps = 100
 		self._melody.start()
 
 	def alarm(self):
-		self.stop()
-		time_start = time.time()
 
-		# Notes to play
-		notes = range(-30,30)
-
-		# Duration of each note
-		duration = 0.01
-
-		# Total duration of melody
-		total = len(notes) * duration
-
-		def alarm():
-			now = time.time() - time_start
-			delta = round( (now % total) / duration )
-						
-			note = notes[int(delta)-1]
-	
-			pibrella.buzzer.note(note)
-			
-			time.sleep(0.005)
-			
-		self._melody = AsyncWorker(alarm)
-		self.fps = 100
-		self._melody.start()
+		# Play all notes from -30 to 30
+		# with a note duration of 0.01sec
+		# and, boom, we have an alarm!
+		self.melody(range(-30,30),0.01)
 
 	def stop(self):
 		if self._melody != None:
