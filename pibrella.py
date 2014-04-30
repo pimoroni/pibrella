@@ -294,6 +294,8 @@ class Button(Input):
 #
 #  Output contains methods that
 #  apply only to outputs
+#  It also contains methods for pulsing, 
+#  blinking LEDs or other attached devices
 class Output(Pin):
 
 	type = 'Output'
@@ -303,61 +305,6 @@ class Output(Pin):
 		super(Output,self).__init__(pin)
 		self.gpio_pwm = GPIO.PWM(pin,1)
 
-	# The crux of an Output is its write function
-
-	def pwm(self,freq,duty_cycle = 50):
-		self.gpio_pwm.ChangeDutyCycle(duty_cycle)
-		self.gpio_pwm.ChangeFrequency(freq)
-		self.gpio_pwm.start(duty_cycle)
-		return True
-
-	def frequency(self,freq):
-		self.gpio_pwm.ChangeFrequency(freq)
-		return True
-
-	def duty_cycle(self,duty_cycle):
-		self.gpio_pwm.ChangeDutyCycle(duty_cycle)
-		return True
-
-	def stop(self):
-		self.gpio_pwm.stop()
-		return True
-
-	def write(self,value):
-		GPIO.output(self.pin,value)
-		return True
-
-	def on(self):
-		self.duty_cycle(100)
-		self.gpio_pwm.stop()
-		self.write(1)
-		return True
-
-	def off(self):
-		self.duty_cycle(0)
-		self.gpio_pwm.stop()
-		self.write(0)
-		return True
-
-	# Alias on/off to conventional names
-	high = on
-	low  = off
-
-	def toggle(self):
-		if( self.read() == 1 ):
-			self.write(0)
-		else:
-			self.write(1)
-
-## Pibrella class representing an onboard LED
-#
-# Light contains methods for pulsing, blinking LEDs
-class Light(Output):
-
-	type = 'Light'
-
-	def __init__(self,pin):
-		super(Light,self).__init__(pin)
 		self.pulser = Pulse(self,0,0,0,0)
 		self.blinking = False
 		self.pulsing = False
@@ -455,41 +402,19 @@ class Light(Output):
 
 		return True
 
-	## Turns an LED on
-	#  @param self Object pointer.
-	#
-	#  Includes handling of pulsing/blinking functions
-	#  which must be stopped before turning on
-	def on(self):
-		# Some gymnastics here to fix a big ( in RPi.GPIO?)
-		# That occurs when trying to output(1) immediately
-		# after stopping the PWM
-		blinking = self.blinking
-		self.stop()
-		# A small delay is needed. Ugly, but it works
-		if blinking:
-			time.sleep(0.05)
-		return super(Light,self).on()
-	high = on
+	def pwm(self,freq,duty_cycle = 50):
+		self.gpio_pwm.ChangeDutyCycle(duty_cycle)
+		self.gpio_pwm.ChangeFrequency(freq)
+		self.gpio_pwm.start(duty_cycle)
+		return True
 
-	## Turns an LED off
-	#  @param self Object pointer.
-	#
-	#  Includes handling of pulsing/blinking functions
-	#  which must be stopped before turning off
-	def off(self):
-		# Obviously stop blinking and/or pulsing if we're
-		# turning this light off
-		self.stop()
-		return super(Light,self).off()
-	low = off
+	def frequency(self,freq):
+		self.gpio_pwm.ChangeFrequency(freq)
+		return True
 
-	## Stops the pulsing thread
-	#  @param self Object pointer.
-	def stop_pulse(self):
-		self.pulsing = False
-		self.pulser.stop()
-		self.pulser = Pulse(self,0,0,0,0)
+	def duty_cycle(self,duty_cycle):
+		self.gpio_pwm.ChangeDutyCycle(duty_cycle)
+		return True
 
 	## Stops the pulsing thread
 	def stop(self):
@@ -508,6 +433,72 @@ class Light(Output):
 		# no errors when stop coincided with a
 		# duty cycle change.
 		return True
+
+	## Stops the pulsing thread
+	#  @param self Object pointer.
+	def stop_pulse(self):
+		self.pulsing = False
+		self.pulser.stop()
+		self.pulser = Pulse(self,0,0,0,0)
+
+	def write(self,value):
+		GPIO.output(self.pin,value)
+		return True
+
+	## Turns an Output on
+	#  @param self Object pointer.
+	#
+	#  Includes handling of pulsing/blinking functions
+	#  which must be stopped before turning on
+	def on(self):
+		# Some gymnastics here to fix a bug ( in RPi.GPIO?)
+		# That occurs when trying to output(1) immediately
+		# after stopping the PWM
+		blinking = self.blinking
+		self.stop()
+		# A small delay is needed. Ugly, but it works
+		if blinking:
+			time.sleep(0.05)
+
+		self.duty_cycle(100)
+		self.gpio_pwm.stop()
+		self.write(1)
+		return True
+
+	## Turns an Output off
+	#  @param self Object pointer.
+	#
+	#  Includes handling of pulsing/blinking functions
+	#  which must be stopped before turning off
+	def off(self):
+		# Obviously stop blinking and/or pulsing if we're
+		# turning this light off
+		self.stop()
+
+		self.duty_cycle(0)
+		self.gpio_pwm.stop()
+		self.write(0)
+		return True
+
+	# Alias on/off to conventional names
+	high = on
+	low  = off
+
+	def toggle(self):
+		if( self.read() == 1 ):
+			self.write(0)
+		else:
+			self.write(1)
+
+## Pibrella class representing an onboard LED
+#
+# 
+class Light(Output):
+
+	type = 'Light'
+
+	def __init__(self,pin):
+		super(Light,self).__init__(pin)
 
 ## Pibrella class representing a buzzer
 #
@@ -671,7 +662,6 @@ class Buzzer(Output):
 		if self._melody != None:
 			self._melody.stop()
 		return super(Buzzer,self).stop()
-		
 
 class Pibrella:
 	light = None

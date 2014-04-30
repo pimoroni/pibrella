@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+1.1.4-dev
+---------
+- Added pulse(), blink() and fade() to all outputs
+
 1.1.3-dev
 ---------
 - Built-in asyncronous alarm sound! pibrella.buzzer.alarm()

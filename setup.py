@@ -33,7 +33,7 @@ classifiers = ['Development Status :: 4 - Beta',
                'Topic :: System :: Hardware']
 
 setup(name		= 'Pibrella',
-	version		= '1.1.3dev',
+	version		= '1.1.4dev',
 	author		= 'Philip Howard',
 	author_email	= 'phil@gadgetoid.com',
 	description	= 'A module to control the Pibrella Raspberry Pi Addon Board',
@@ -43,5 +43,5 @@ setup(name		= 'Pibrella',
 	url		= 'http://www.pibrella.com',
 	classifiers     = classifiers,
 	py_modules	= ['pibrella'],
-	install_requires= ['rpi.gpio >= 0.5.4']
+	install_requires= ['rpi.gpio >= 0.5.5']
 )
