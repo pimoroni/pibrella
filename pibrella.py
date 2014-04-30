@@ -610,7 +610,7 @@ class Buzzer(Output):
 		# Split our notation into individual notes
 		notes = notation.split(' ')
 
-		print notes
+		# print notes
 
 		# Set up a list for our parsed output
 		parsed = ['N']
