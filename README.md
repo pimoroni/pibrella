@@ -170,3 +170,62 @@ If you want to turn a light on when the button is pressed, your code should look
 
 And in just 4 lines, you've got started with event-driven programming!
 
+Quick Reference
+===============
+
+All of Pibrella's inputs, outputs and lights are stored in collectons. You can reference a pin by name or by index in one of three ways:
+
+	pibrella.light[0]		# By index
+	pibrella.light['red']		# By name, for use with a variable
+	pibrella.light.red		# By name
+
+You can also refer to a whole collection at once, simply by omitting the index or name:
+	
+	pibrella.light
+
+Help Text
+---------
+
+Pibrella has a small amount of built-in help. If you want to know the names of the lights, inputs or putputs simply type:
+
+    pibrella.lights
+
+Or otherwise, and you'll get a list of the supported names.
+
+Lights
+------
+
+The following methods are available for every Pibrella light:
+
+	.on()	# Turn a light on
+	.off()	# Turn a light off
+	.high()	# Same as on
+	.low() 	# Same as off
+
+	.toggle() # Toggle a lights status from on to off and off to on
+	# If lights are pulsing/blinking toggle will always turn them off
+
+	.pulse( transition_on, transition_off, time_on, time_off )	# Pulse a light, values in seconds
+	.blink( time_on, time_off )	# Blink a light, values in seconds
+	.write( value )	# Turn on if value = 1, or off if value = 0
+
+Outputs
+-------
+
+An output can do everything a light can do, they are identical in all but name!
+
+Inputs
+------
+
+The following methods are available for every Pibrella input:
+
+General
+-------
+
+	pibrella.pause() # Wrapper for signal.pause(), great for pausing your application after calling blink, pulse or loop
+
+	pibrella.loop( function_name )  # Pass pibrella a function to run over and over again, asyncronously
+	# You must call pibrella.pause() after giving it a function to loop, or your code will simply exit!
+
+
+

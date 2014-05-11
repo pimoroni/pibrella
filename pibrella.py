@@ -19,7 +19,7 @@ if GPIO.RPI_REVISION == 1:
 else:
 	PB_PIN_LIGHT_RED = 27
 
-PB_PIN_LIGHT_AMBER = 17
+PB_PIN_LIGHT_YELLOW = 17
 PB_PIN_LIGHT_GREEN = 4
 
 # Inputs
@@ -140,6 +140,7 @@ class Pins:
 
 	def __init__(self, **kwargs):
 		self._all = {}
+		self._aliases = {}
 		self._index = []
 		for name in kwargs:
 				self._add_single(name,kwargs[name])
@@ -157,6 +158,8 @@ class Pins:
 		# Return the pin if we have it
 		if name in self._all.keys():
 			return self._all[name]
+		if name in self._aliases.keys():
+			return self._aliases[name]
 		# Otherwise try to run against all pins
 		else:
 			def handlerFunction(*args,**kwargs):
@@ -187,9 +190,16 @@ class Pins:
 	def count(self):
 		return self.all.count()
 
+	def _alias(self,**kwargs):
+		for name in kwargs:
+			self._add_alias(name,kwargs[name])
+
 	def _add(self,**kwargs):
 		for name in kwargs:
-				self._add_single(name,kwargs[name])
+			self._add_single(name,kwargs[name])
+
+	def _add_alias(self,name,target):
+		self._aliases[name] = self._all[target]
 
 	def _add_single(self,name,obj):
 		# Handle adding additional items after init
@@ -442,7 +452,23 @@ class Output(Pin):
 		self.pulser = Pulse(self,0,0,0,0)
 
 	def write(self,value):
+		blinking = self.blinking
+
+		self.stop()
+
+		self.duty_cycle(100)
+		self.gpio_pwm.stop()
+
+		# Some gymnastics here to fix a bug ( in RPi.GPIO?)
+		# That occurs when trying to output(1) immediately
+		# after stopping the PWM
+
+		# A small delay is needed. Ugly, but it works
+		if blinking and value == 1:
+			time.sleep(0.02)
+
 		GPIO.output(self.pin,value)
+
 		return True
 
 	## Turns an Output on
@@ -451,17 +477,6 @@ class Output(Pin):
 	#  Includes handling of pulsing/blinking functions
 	#  which must be stopped before turning on
 	def on(self):
-		# Some gymnastics here to fix a bug ( in RPi.GPIO?)
-		# That occurs when trying to output(1) immediately
-		# after stopping the PWM
-		blinking = self.blinking
-		self.stop()
-		# A small delay is needed. Ugly, but it works
-		if blinking:
-			time.sleep(0.05)
-
-		self.duty_cycle(100)
-		self.gpio_pwm.stop()
 		self.write(1)
 		return True
 
@@ -471,12 +486,6 @@ class Output(Pin):
 	#  Includes handling of pulsing/blinking functions
 	#  which must be stopped before turning off
 	def off(self):
-		# Obviously stop blinking and/or pulsing if we're
-		# turning this light off
-		self.stop()
-
-		self.duty_cycle(0)
-		self.gpio_pwm.stop()
 		self.write(0)
 		return True
 
@@ -485,10 +494,15 @@ class Output(Pin):
 	low  = off
 
 	def toggle(self):
+		if( self.blinking ):
+			self.write(0)
+			return True
+
 		if( self.read() == 1 ):
 			self.write(0)
 		else:
 			self.write(1)
+		return True
 
 ## Pibrella class representing an onboard LED
 #
@@ -742,8 +756,10 @@ pibrella = Pibrella()
 # Create an object containing our lights
 pibrella.light = Pins()
 pibrella.light._add(red = Light(PB_PIN_LIGHT_RED))
-pibrella.light._add(amber = Light(PB_PIN_LIGHT_AMBER))
+pibrella.light._add(yellow = Light(PB_PIN_LIGHT_YELLOW))
 pibrella.light._add(green = Light(PB_PIN_LIGHT_GREEN))
+pibrella.light._alias(amber = 'yellow')
+pibrella.lights = pibrella.light
 
 # Create an object containing our inputs
 pibrella.input = Pins()
@@ -751,6 +767,7 @@ pibrella.input._add(a = Input(PB_PIN_INPUT_A))
 pibrella.input._add(b = Input(PB_PIN_INPUT_B))
 pibrella.input._add(c = Input(PB_PIN_INPUT_C))
 pibrella.input._add(d = Input(PB_PIN_INPUT_D))
+pibrella.inputs = pibrella.input
 
 # Create an object contianing our outputs
 pibrella.output = Pins()
@@ -758,6 +775,7 @@ pibrella.output._add(e = Output(PB_PIN_OUTPUT_A))
 pibrella.output._add(f = Output(PB_PIN_OUTPUT_B))
 pibrella.output._add(g = Output(PB_PIN_OUTPUT_C))
 pibrella.output._add(h = Output(PB_PIN_OUTPUT_D))
+pibrella.outputs = pibrella.output
 
 # And our button
 pibrella.button = Button(PB_PIN_BUTTON)
@@ -782,7 +800,7 @@ pibrella.pin._add(d  = pibrella.input.d)
 
 # Lights
 pibrella.pin._add(red   = pibrella.light.red)
-pibrella.pin._add(amber = pibrella.light.amber)
+pibrella.pin._add(yellow = pibrella.light.yellow)
 pibrella.pin._add(green = pibrella.light.green)
 
 # Buzzer
@@ -790,6 +808,8 @@ pibrella.pin._add(buzzer= pibrella.buzzer)
 
 # Button
 pibrella.pin._add(button = pibrella.button)
+
+pibrella.pins = pibrella.pin
 
 # Alias all the things!
 # This lets users "import pibrella" instead of "import pibrella from pibrella"
@@ -803,11 +823,15 @@ stop = pibrella.stop
 
 # IO
 light = pibrella.light
+lights = pibrella.lights
 input = pibrella.input
+inputs = pibrella.inputs
 output = pibrella.output
+outputs = pibrella.outputs
 button = pibrella.button
 buzzer = pibrella.buzzer
 pin = pibrella.pin
+pins = pibrella.pin
 
 # Aliases of input/output and light
 In = IN = input
