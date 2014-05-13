@@ -1,6 +1,15 @@
 Change Log
 ==========
 
+1.1.5-dev
+- Renamed amber to yellow and added alias support for backwards-compatibility
+- Added lights, inputs, outputs and pins as pluralalised aliases for light, input etc
+- Tweaked how on/off/toggle calls to lights/outputs are handled during pulse/blink
+
+1.1.4-dev
+---------
+- Added pulse(), blink() and fade() to all outputs
+
 1.1.3-dev
 ---------
 - Built-in asyncronous alarm sound! pibrella.buzzer.alarm()

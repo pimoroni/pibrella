@@ -19,7 +19,7 @@ if GPIO.RPI_REVISION == 1:
 else:
 	PB_PIN_LIGHT_RED = 27
 
-PB_PIN_LIGHT_AMBER = 17
+PB_PIN_LIGHT_YELLOW = 17
 PB_PIN_LIGHT_GREEN = 4
 
 # Inputs
@@ -140,6 +140,7 @@ class Pins:
 
 	def __init__(self, **kwargs):
 		self._all = {}
+		self._aliases = {}
 		self._index = []
 		for name in kwargs:
 				self._add_single(name,kwargs[name])
@@ -157,6 +158,8 @@ class Pins:
 		# Return the pin if we have it
 		if name in self._all.keys():
 			return self._all[name]
+		if name in self._aliases.keys():
+			return self._aliases[name]
 		# Otherwise try to run against all pins
 		else:
 			def handlerFunction(*args,**kwargs):
@@ -187,9 +190,16 @@ class Pins:
 	def count(self):
 		return self.all.count()
 
+	def _alias(self,**kwargs):
+		for name in kwargs:
+			self._add_alias(name,kwargs[name])
+
 	def _add(self,**kwargs):
 		for name in kwargs:
-				self._add_single(name,kwargs[name])
+			self._add_single(name,kwargs[name])
+
+	def _add_alias(self,name,target):
+		self._aliases[name] = self._all[target]
 
 	def _add_single(self,name,obj):
 		# Handle adding additional items after init
@@ -294,6 +304,8 @@ class Button(Input):
 #
 #  Output contains methods that
 #  apply only to outputs
+#  It also contains methods for pulsing, 
+#  blinking LEDs or other attached devices
 class Output(Pin):
 
 	type = 'Output'
@@ -303,61 +315,6 @@ class Output(Pin):
 		super(Output,self).__init__(pin)
 		self.gpio_pwm = GPIO.PWM(pin,1)
 
-	# The crux of an Output is its write function
-
-	def pwm(self,freq,duty_cycle = 50):
-		self.gpio_pwm.ChangeDutyCycle(duty_cycle)
-		self.gpio_pwm.ChangeFrequency(freq)
-		self.gpio_pwm.start(duty_cycle)
-		return True
-
-	def frequency(self,freq):
-		self.gpio_pwm.ChangeFrequency(freq)
-		return True
-
-	def duty_cycle(self,duty_cycle):
-		self.gpio_pwm.ChangeDutyCycle(duty_cycle)
-		return True
-
-	def stop(self):
-		self.gpio_pwm.stop()
-		return True
-
-	def write(self,value):
-		GPIO.output(self.pin,value)
-		return True
-
-	def on(self):
-		self.duty_cycle(100)
-		self.gpio_pwm.stop()
-		self.write(1)
-		return True
-
-	def off(self):
-		self.duty_cycle(0)
-		self.gpio_pwm.stop()
-		self.write(0)
-		return True
-
-	# Alias on/off to conventional names
-	high = on
-	low  = off
-
-	def toggle(self):
-		if( self.read() == 1 ):
-			self.write(0)
-		else:
-			self.write(1)
-
-## Pibrella class representing an onboard LED
-#
-# Light contains methods for pulsing, blinking LEDs
-class Light(Output):
-
-	type = 'Light'
-
-	def __init__(self,pin):
-		super(Light,self).__init__(pin)
 		self.pulser = Pulse(self,0,0,0,0)
 		self.blinking = False
 		self.pulsing = False
@@ -455,41 +412,19 @@ class Light(Output):
 
 		return True
 
-	## Turns an LED on
-	#  @param self Object pointer.
-	#
-	#  Includes handling of pulsing/blinking functions
-	#  which must be stopped before turning on
-	def on(self):
-		# Some gymnastics here to fix a big ( in RPi.GPIO?)
-		# That occurs when trying to output(1) immediately
-		# after stopping the PWM
-		blinking = self.blinking
-		self.stop()
-		# A small delay is needed. Ugly, but it works
-		if blinking:
-			time.sleep(0.05)
-		return super(Light,self).on()
-	high = on
+	def pwm(self,freq,duty_cycle = 50):
+		self.gpio_pwm.ChangeDutyCycle(duty_cycle)
+		self.gpio_pwm.ChangeFrequency(freq)
+		self.gpio_pwm.start(duty_cycle)
+		return True
 
-	## Turns an LED off
-	#  @param self Object pointer.
-	#
-	#  Includes handling of pulsing/blinking functions
-	#  which must be stopped before turning off
-	def off(self):
-		# Obviously stop blinking and/or pulsing if we're
-		# turning this light off
-		self.stop()
-		return super(Light,self).off()
-	low = off
+	def frequency(self,freq):
+		self.gpio_pwm.ChangeFrequency(freq)
+		return True
 
-	## Stops the pulsing thread
-	#  @param self Object pointer.
-	def stop_pulse(self):
-		self.pulsing = False
-		self.pulser.stop()
-		self.pulser = Pulse(self,0,0,0,0)
+	def duty_cycle(self,duty_cycle):
+		self.gpio_pwm.ChangeDutyCycle(duty_cycle)
+		return True
 
 	## Stops the pulsing thread
 	def stop(self):
@@ -508,6 +443,76 @@ class Light(Output):
 		# no errors when stop coincided with a
 		# duty cycle change.
 		return True
+
+	## Stops the pulsing thread
+	#  @param self Object pointer.
+	def stop_pulse(self):
+		self.pulsing = False
+		self.pulser.stop()
+		self.pulser = Pulse(self,0,0,0,0)
+
+	def write(self,value):
+		blinking = self.blinking
+
+		self.stop()
+
+		self.duty_cycle(100)
+		self.gpio_pwm.stop()
+
+		# Some gymnastics here to fix a bug ( in RPi.GPIO?)
+		# That occurs when trying to output(1) immediately
+		# after stopping the PWM
+
+		# A small delay is needed. Ugly, but it works
+		if blinking and value == 1:
+			time.sleep(0.02)
+
+		GPIO.output(self.pin,value)
+
+		return True
+
+	## Turns an Output on
+	#  @param self Object pointer.
+	#
+	#  Includes handling of pulsing/blinking functions
+	#  which must be stopped before turning on
+	def on(self):
+		self.write(1)
+		return True
+
+	## Turns an Output off
+	#  @param self Object pointer.
+	#
+	#  Includes handling of pulsing/blinking functions
+	#  which must be stopped before turning off
+	def off(self):
+		self.write(0)
+		return True
+
+	# Alias on/off to conventional names
+	high = on
+	low  = off
+
+	def toggle(self):
+		if( self.blinking ):
+			self.write(0)
+			return True
+
+		if( self.read() == 1 ):
+			self.write(0)
+		else:
+			self.write(1)
+		return True
+
+## Pibrella class representing an onboard LED
+#
+# 
+class Light(Output):
+
+	type = 'Light'
+
+	def __init__(self,pin):
+		super(Light,self).__init__(pin)
 
 ## Pibrella class representing a buzzer
 #
@@ -534,74 +539,143 @@ class Buzzer(Output):
 
 	# Example sound effects
 	def success(self):
-		# Stop any current sound
-		self.stop()
-		def success():
-			for note in range(0,4):
-				self.note(note)
-				time.sleep(0.2)
-			time.sleep(0.4)
-
-			# Stop using the parent stop
-			# method since this one
-			# tries to stop the thread!
-			super(Buzzer,self).stop()
-
-			# Prevent looping
-			return False
-		self._melody = AsyncWorker(success)
-		self._melody.start()
+		# Repeat the last note to extend its duration
+		self.melody([0,1,2,3,3,3,3,3],0.2,False)
 		return True
 
 	def fail(self):
-		# Stop any current sound
-		self.stop()
-		def fail():
-			for note in reversed(range(0,5)):
-				self.note(note)
-				time.sleep(0.2)
-			time.sleep(0.4)
-			
-			super(Buzzer,self).stop()
-
-			# Prevent looping
-			return False
-		self._melody = AsyncWorker(fail)
-		self._melody.start()
+		# Repeat the last note to extend its duration
+		self.melody([5,4,3,2,1,1,1,1,1],0.2,False)
 		return True
 
-	def alarm(self):
+	def melody(self,notes,duration = 0.5,loop = True):
 		self.stop()
 		time_start = time.time()
+		is_notation = False
 
-		# Notes to play
-		notes = range(-30,30)
+		if notes[0] == 'N':
+			is_notation = True
+			notes.pop(0)
 
-		# Duration of each note
-		duration = 0.01
+		if duration <= 0.0001:
+			raise ValueError('Duration must be greater than 0.0001')
 
-		# Total duration of melody
+		if len(notes) == 0:
+			raise ValueError('You must provide at least one note')
+
+		# Get the total length of the tune
+		# so we can play it!
 		total = len(notes) * duration
 
-		def alarm():
+		def melody():
+
 			now = time.time() - time_start
+			
+			# Play only once if loop is false
+			if loop == False and int(now / total) > 0:
+				super(Buzzer,self).stop()
+				return False
+
+			# Figure out how far we are into the current iteration
+			# Then divide by duration to find the current note index
 			delta = round( (now % total) / duration )
-						
+			
+			# Select the note from the notes array
 			note = notes[int(delta)-1]
+			
+			
+			if is_notation:
+				# this note and above would be OVER NINE THOUSAND Hz!
+				# Treat it as an explicit pitch instead
+				if note == 0:
+					super(Buzzer,self).stop()
+				else:
+					pibrella.buzzer.buzz(note)
+			else:
+				if note == '-':
+					super(Buzzer,self).stop()
+				else:
+					# Play the note
+					pibrella.buzzer.note(note)
 	
-			pibrella.buzzer.note(note)
-			
-			time.sleep(0.005)
-			
-		self._melody = AsyncWorker(alarm)
+			# Sleep a bit
+			time.sleep(0.0001)
+
+		self._melody = AsyncWorker(melody)
 		self.fps = 100
 		self._melody.start()
+
+	def alarm(self):
+
+		# Play all notes from -30 to 30
+		# with a note duration of 0.01sec
+		# and, boom, we have an alarm!
+		self.melody(range(-30,30),0.01)
+
+	def notes(self,notation,speed=0.5):
+		import re
+
+		# Constant of about 1.0594
+		N = pow( 2.0, (1.0/12.0) )
+
+		# Table of notes, no support for flats YET
+		note_key = ['A','A#','B','C','C#','D','D#','E','F','F#','G','G#']
+
+		# Split our notation into individual notes
+		notes = notation.split(' ')
+
+		# print notes
+
+		# Set up a list for our parsed output
+		parsed = ['N']
+
+		# Step through each note in turn
+		for note in notes:
+
+			# Split out the note and duration components
+			detail = note.split(':')
+			if len(detail) == 2:
+				# We have a note and a duration
+				note = detail[0]
+				dur = int(detail[1])
+			else:
+				# We have just a note, so duration is 1 beat
+				note = detail[0]
+				dur = 1
+
+			# Now try to match an octave
+			octave = re.findall(r'\d+', note)
+
+			# If we can't find one, default to octave 5
+			if len(octave) == 0:
+				octave = 5.0
+			else:
+				note = note.replace(octave[0],'')
+				octave = float(octave[0])
+
+			# If the note is a rest, turn off for that duration
+			if note == 'R':
+				for _ in range(dur):
+					parsed.append(0) # Frequency of 0 ( off )
+			else:
+			# Otherwise, calculate the pitch of the note from A1 at 55Hz
+				note_index = float(note_key.index( note ))
+
+				# Pitch of the note itself is  1.0594 ^ note_index
+				pitch = 55.000 * pow( N, note_index )
+
+				# Then we shift up 2 to the power of the octave index -1
+				pitch = round( pitch  * pow( 2, ( octave - 1 ) ) ,3)
+
+				for _ in range(dur):
+					parsed.append(pitch)
+
+		self.melody(parsed,speed)
 
 	def stop(self):
 		if self._melody != None:
 			self._melody.stop()
 		return super(Buzzer,self).stop()
-		
 
 class Pibrella:
 	light = None
@@ -682,8 +756,10 @@ pibrella = Pibrella()
 # Create an object containing our lights
 pibrella.light = Pins()
 pibrella.light._add(red = Light(PB_PIN_LIGHT_RED))
-pibrella.light._add(amber = Light(PB_PIN_LIGHT_AMBER))
+pibrella.light._add(yellow = Light(PB_PIN_LIGHT_YELLOW))
 pibrella.light._add(green = Light(PB_PIN_LIGHT_GREEN))
+pibrella.light._alias(amber = 'yellow')
+pibrella.lights = pibrella.light
 
 # Create an object containing our inputs
 pibrella.input = Pins()
@@ -691,6 +767,7 @@ pibrella.input._add(a = Input(PB_PIN_INPUT_A))
 pibrella.input._add(b = Input(PB_PIN_INPUT_B))
 pibrella.input._add(c = Input(PB_PIN_INPUT_C))
 pibrella.input._add(d = Input(PB_PIN_INPUT_D))
+pibrella.inputs = pibrella.input
 
 # Create an object contianing our outputs
 pibrella.output = Pins()
@@ -698,6 +775,7 @@ pibrella.output._add(e = Output(PB_PIN_OUTPUT_A))
 pibrella.output._add(f = Output(PB_PIN_OUTPUT_B))
 pibrella.output._add(g = Output(PB_PIN_OUTPUT_C))
 pibrella.output._add(h = Output(PB_PIN_OUTPUT_D))
+pibrella.outputs = pibrella.output
 
 # And our button
 pibrella.button = Button(PB_PIN_BUTTON)
@@ -722,7 +800,7 @@ pibrella.pin._add(d  = pibrella.input.d)
 
 # Lights
 pibrella.pin._add(red   = pibrella.light.red)
-pibrella.pin._add(amber = pibrella.light.amber)
+pibrella.pin._add(yellow = pibrella.light.yellow)
 pibrella.pin._add(green = pibrella.light.green)
 
 # Buzzer
@@ -730,6 +808,8 @@ pibrella.pin._add(buzzer= pibrella.buzzer)
 
 # Button
 pibrella.pin._add(button = pibrella.button)
+
+pibrella.pins = pibrella.pin
 
 # Alias all the things!
 # This lets users "import pibrella" instead of "import pibrella from pibrella"
@@ -743,11 +823,15 @@ stop = pibrella.stop
 
 # IO
 light = pibrella.light
+lights = pibrella.lights
 input = pibrella.input
+inputs = pibrella.inputs
 output = pibrella.output
+outputs = pibrella.outputs
 button = pibrella.button
 buzzer = pibrella.buzzer
 pin = pibrella.pin
+pins = pibrella.pin
 
 # Aliases of input/output and light
 In = IN = input
