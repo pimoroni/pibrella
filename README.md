@@ -6,9 +6,21 @@ Support code and API library for the Pibrella addon board.
 Installation
 ============
 
-The easy way, just:
+The easy way
+------------
 
-    pip install pibrella
+**Python 3:**
+
+    sudo apt-get install python3-pip
+    sudo pip-3.2 install pibrella
+
+**Python 2:**
+
+    sudo apt-get install python-pip
+    sudo pip install pibrella
+
+Alternative method
+------------------
 
 Alternatively you can clone this repository and install:
 
