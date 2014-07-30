@@ -33,7 +33,7 @@ classifiers = ['Development Status :: 4 - Beta',
                'Topic :: System :: Hardware']
 
 setup(name		= 'Pibrella',
-	version		= '1.1.5dev',
+	version		= '1.1.6dev',
 	author		= 'Philip Howard',
 	author_email	= 'phil@gadgetoid.com',
 	description	= 'A module to control the Pibrella Raspberry Pi Addon Board',

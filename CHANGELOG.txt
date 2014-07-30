@@ -1,5 +1,7 @@
 Change Log
 ==========
+1.1.6-dev
+- Populated LICENSE.txt
 
 1.1.5-dev
 - Renamed amber to yellow and added alias support for backwards-compatibility
