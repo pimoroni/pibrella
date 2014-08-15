@@ -252,6 +252,10 @@ class Input(Pin):
 	type = 'Input'
 
 	def __init__(self, pin):
+		self.handle_pressed = None
+		self.handle_released = None
+		self.handle_changed = None
+		self.has_callback = False
 		if self.type == 'Button':
 			GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 		else:
@@ -259,25 +263,38 @@ class Input(Pin):
 		super(Input,self).__init__(pin)
 
 	def on_high(self, callback, bouncetime=DEBOUNCE_TIME):
+		self.handle_pressed = callback
+		self._setup_callback(bouncetime)
+		return True
+
+	def _setup_callback(self, bouncetime):
+		if self.has_callback:
+			return False
+
 		def handle_callback(pin):
-			callback(self)
-		GPIO.add_event_detect(self.pin, GPIO.RISING, callback=handle_callback, bouncetime=bouncetime)
+			if self.read() == 1 and callable(self.handle_pressed):
+				self.handle_pressed(self)
+			elif self.read() == 0 and callable(self.handle_released):
+				self.handle_released(self)
+			if callable(self.handle_changed):
+				self.handle_changed(self)
+		GPIO.add_event_detect(self.pin, GPIO.BOTH, callback=handle_callback, bouncetime=bouncetime)
+		self.has_callback = True
 		return True
 
 	def on_low(self, callback, bouncetime=DEBOUNCE_TIME):
-		def handle_callback(pin):
-			callback(self)
-		GPIO.add_event_detect(self.pin, GPIO.FALLING, callback=handle_callback, bouncetime=bouncetime)
+		self.handle_released = callback
+		self._setup_callback(bouncetime)
 		return True
 		
 	def on_changed(self, callback, bouncetime=DEBOUNCE_TIME):
-		def handle_callback(pin):
-			callback(self)
-		GPIO.add_event_detect(self.pin, GPIO.BOTH, callback=handle_callback, bouncetime=bouncetime)
+		self.handle_changed = callback
+		self._setup_callback(bouncetime)
 		return True
 
 	def clear_events(self):
 		GPIO.remove_event_detect(self.pin)
+		self.has_callback = False
 
 	# Alias handlers
 	changed = on_changed
@@ -763,7 +780,9 @@ GPIO.setwarnings(False)
 def pibrella_exit():
 	try:
 		pibrella.exit()
-	except AttributeError,NameError:
+	except AttributeError:
+		print("Pibrella not initialized!")
+	except NameError:
 		print("Pibrella not initialized!")
 
 atexit.register(pibrella_exit)
