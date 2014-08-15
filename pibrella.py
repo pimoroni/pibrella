@@ -82,6 +82,7 @@ class AsyncWorker(StoppableThread):
 	def run(self):
 		while self.stop_event.is_set() == False:
 			if self.todo() == False:
+				self.stop_event.set()
 				break
 
 ## Basic thread wrapper class for delta-timed LED pulsing
@@ -573,7 +574,7 @@ class Buzzer(Output):
 			
 			# Play only once if loop is false
 			if loop == False and int(now / total) > 0:
-				super(Buzzer,self).stop()
+				self._stop_buzzer()
 				return False
 
 			# Figure out how far we are into the current iteration
@@ -588,12 +589,12 @@ class Buzzer(Output):
 				# this note and above would be OVER NINE THOUSAND Hz!
 				# Treat it as an explicit pitch instead
 				if note == 0:
-					super(Buzzer,self).stop()
+					self._stop_buzzer()
 				else:
 					pibrella.buzzer.buzz(note)
 			else:
 				if note == '-':
-					super(Buzzer,self).stop()
+					self._stop_buzzer()
 				else:
 					# Play the note
 					pibrella.buzzer.note(note)
@@ -672,9 +673,20 @@ class Buzzer(Output):
 
 		self.melody(parsed,speed)
 
+	def _stop_buzzer(self):
+		self.duty_cycle(100)
+		self.gpio_pwm.stop()
+
+		time.sleep(0.02)
+
+		GPIO.output(self.pin,0)
+
 	def stop(self):
 		if self._melody != None:
 			self._melody.stop()
+
+		self._stop_buzzer()
+
 		return super(Buzzer,self).stop()
 
 class Pibrella:
