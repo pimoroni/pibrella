@@ -153,6 +153,9 @@ class Pins:
 	def __str__(self):
 		return ', '.join( self._all.keys() )
 
+	def __len__(self):
+		return len(self._index)
+
 	## Returns a pin, if its found by name,
 	#  otherwise tries to run the named function against all pins
 	def __getattr__(self,name):
