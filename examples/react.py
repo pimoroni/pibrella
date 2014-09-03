@@ -24,7 +24,7 @@ def handle_reaction(pin):
 	# Don't handle subsequent button presses
 	# that would be a little harsh!
 	if button_pressed == True:
-		return false
+		return False
 
 	if current_light == 'red':
 		# Determine how long the reaction took
