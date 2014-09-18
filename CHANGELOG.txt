@@ -1,9 +1,19 @@
 Change Log
 ==========
+
+1.1.7-dev
+---------
+- Fixed buzzer to stop after playing melody
+- Wrapped changed/pressed/released so they can be registered simultaneously
+- Added "len" to pin collections, to support random.choice(pibrella.light)
+- Added error if run without root
+
 1.1.6-dev
+---------
 - Populated LICENSE.txt
 
 1.1.5-dev
+---------
 - Renamed amber to yellow and added alias support for backwards-compatibility
 - Added lights, inputs, outputs and pins as pluralalised aliases for light, input etc
 - Tweaked how on/off/toggle calls to lights/outputs are handled during pulse/blink

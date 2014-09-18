@@ -82,6 +82,7 @@ class AsyncWorker(StoppableThread):
 	def run(self):
 		while self.stop_event.is_set() == False:
 			if self.todo() == False:
+				self.stop_event.set()
 				break
 
 ## Basic thread wrapper class for delta-timed LED pulsing
@@ -151,6 +152,9 @@ class Pins:
 
 	def __str__(self):
 		return ', '.join( self._all.keys() )
+
+	def __len__(self):
+		return len(self._index)
 
 	## Returns a pin, if its found by name,
 	#  otherwise tries to run the named function against all pins
@@ -251,6 +255,10 @@ class Input(Pin):
 	type = 'Input'
 
 	def __init__(self, pin):
+		self.handle_pressed = None
+		self.handle_released = None
+		self.handle_changed = None
+		self.has_callback = False
 		if self.type == 'Button':
 			GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 		else:
@@ -258,25 +266,38 @@ class Input(Pin):
 		super(Input,self).__init__(pin)
 
 	def on_high(self, callback, bouncetime=DEBOUNCE_TIME):
+		self.handle_pressed = callback
+		self._setup_callback(bouncetime)
+		return True
+
+	def _setup_callback(self, bouncetime):
+		if self.has_callback:
+			return False
+
 		def handle_callback(pin):
-			callback(self)
-		GPIO.add_event_detect(self.pin, GPIO.RISING, callback=handle_callback, bouncetime=bouncetime)
+			if self.read() == 1 and callable(self.handle_pressed):
+				self.handle_pressed(self)
+			elif self.read() == 0 and callable(self.handle_released):
+				self.handle_released(self)
+			if callable(self.handle_changed):
+				self.handle_changed(self)
+		GPIO.add_event_detect(self.pin, GPIO.BOTH, callback=handle_callback, bouncetime=bouncetime)
+		self.has_callback = True
 		return True
 
 	def on_low(self, callback, bouncetime=DEBOUNCE_TIME):
-		def handle_callback(pin):
-			callback(self)
-		GPIO.add_event_detect(self.pin, GPIO.FALLING, callback=handle_callback, bouncetime=bouncetime)
+		self.handle_released = callback
+		self._setup_callback(bouncetime)
 		return True
 		
 	def on_changed(self, callback, bouncetime=DEBOUNCE_TIME):
-		def handle_callback(pin):
-			callback(self)
-		GPIO.add_event_detect(self.pin, GPIO.BOTH, callback=handle_callback, bouncetime=bouncetime)
+		self.handle_changed = callback
+		self._setup_callback(bouncetime)
 		return True
 
 	def clear_events(self):
 		GPIO.remove_event_detect(self.pin)
+		self.has_callback = False
 
 	# Alias handlers
 	changed = on_changed
@@ -573,7 +594,7 @@ class Buzzer(Output):
 			
 			# Play only once if loop is false
 			if loop == False and int(now / total) > 0:
-				super(Buzzer,self).stop()
+				self._stop_buzzer()
 				return False
 
 			# Figure out how far we are into the current iteration
@@ -588,12 +609,12 @@ class Buzzer(Output):
 				# this note and above would be OVER NINE THOUSAND Hz!
 				# Treat it as an explicit pitch instead
 				if note == 0:
-					super(Buzzer,self).stop()
+					self._stop_buzzer()
 				else:
 					pibrella.buzzer.buzz(note)
 			else:
 				if note == '-':
-					super(Buzzer,self).stop()
+					self._stop_buzzer()
 				else:
 					# Play the note
 					pibrella.buzzer.note(note)
@@ -672,9 +693,20 @@ class Buzzer(Output):
 
 		self.melody(parsed,speed)
 
+	def _stop_buzzer(self):
+		self.duty_cycle(100)
+		self.gpio_pwm.stop()
+
+		time.sleep(0.02)
+
+		GPIO.output(self.pin,0)
+
 	def stop(self):
 		if self._melody != None:
 			self._melody.stop()
+
+		self._stop_buzzer()
+
 		return super(Buzzer,self).stop()
 
 class Pibrella:
@@ -748,99 +780,116 @@ GPIO.setwarnings(False)
 
 # Catch exit and make sure we clean up
 # before classes are too destroyed to do so
-atexit.register(lambda: pibrella.exit())
+def pibrella_exit():
+	try:
+		pibrella.exit()
+	except AttributeError:
+		print("Pibrella not initialized!")
+	except NameError:
+		print("Pibrella not initialized!")
+
+atexit.register(pibrella_exit)
+#atexit.register(lambda: pibrella.exit())
 
 # Instance our Pibrella class
 pibrella = Pibrella()
 
-# Create an object containing our lights
-pibrella.light = Pins()
-pibrella.light._add(red = Light(PB_PIN_LIGHT_RED))
-pibrella.light._add(yellow = Light(PB_PIN_LIGHT_YELLOW))
-pibrella.light._add(green = Light(PB_PIN_LIGHT_GREEN))
-pibrella.light._alias(amber = 'yellow')
-pibrella.lights = pibrella.light
+try:
 
-# Create an object containing our inputs
-pibrella.input = Pins()
-pibrella.input._add(a = Input(PB_PIN_INPUT_A))
-pibrella.input._add(b = Input(PB_PIN_INPUT_B))
-pibrella.input._add(c = Input(PB_PIN_INPUT_C))
-pibrella.input._add(d = Input(PB_PIN_INPUT_D))
-pibrella.inputs = pibrella.input
+	# Create an object containing our lights
+	pibrella.light = Pins()
+	pibrella.light._add(red = Light(PB_PIN_LIGHT_RED))
+	pibrella.light._add(yellow = Light(PB_PIN_LIGHT_YELLOW))
+	pibrella.light._add(green = Light(PB_PIN_LIGHT_GREEN))
+	pibrella.light._alias(amber = 'yellow')
+	pibrella.lights = pibrella.light
+
+	# Create an object containing our inputs
+	pibrella.input = Pins()
+	pibrella.input._add(a = Input(PB_PIN_INPUT_A))
+	pibrella.input._add(b = Input(PB_PIN_INPUT_B))
+	pibrella.input._add(c = Input(PB_PIN_INPUT_C))
+	pibrella.input._add(d = Input(PB_PIN_INPUT_D))
+	pibrella.inputs = pibrella.input
 
 # Create an object contianing our outputs
-pibrella.output = Pins()
-pibrella.output._add(e = Output(PB_PIN_OUTPUT_A))
-pibrella.output._add(f = Output(PB_PIN_OUTPUT_B))
-pibrella.output._add(g = Output(PB_PIN_OUTPUT_C))
-pibrella.output._add(h = Output(PB_PIN_OUTPUT_D))
-pibrella.outputs = pibrella.output
+	pibrella.output = Pins()
+	pibrella.output._add(e = Output(PB_PIN_OUTPUT_A))
+	pibrella.output._add(f = Output(PB_PIN_OUTPUT_B))
+	pibrella.output._add(g = Output(PB_PIN_OUTPUT_C))
+	pibrella.output._add(h = Output(PB_PIN_OUTPUT_D))
+	pibrella.outputs = pibrella.output
 
 # And our button
-pibrella.button = Button(PB_PIN_BUTTON)
+	pibrella.button = Button(PB_PIN_BUTTON)
 
 # And our buzzer
-pibrella.buzzer = Buzzer(PB_PIN_BUZZER)
+	pibrella.buzzer = Buzzer(PB_PIN_BUZZER)
 
 # And collect everything into one place
-pibrella.pin = Pins()
+	pibrella.pin = Pins()
 
 # Outputs
-pibrella.pin._add(e = pibrella.output.e)
-pibrella.pin._add(f = pibrella.output.f)
-pibrella.pin._add(g = pibrella.output.g)
-pibrella.pin._add(h = pibrella.output.h)
+	pibrella.pin._add(e = pibrella.output.e)
+	pibrella.pin._add(f = pibrella.output.f)
+	pibrella.pin._add(g = pibrella.output.g)
+	pibrella.pin._add(h = pibrella.output.h)
 
 # Inputs
-pibrella.pin._add(a  = pibrella.input.a)
-pibrella.pin._add(b  = pibrella.input.b)
-pibrella.pin._add(c  = pibrella.input.c)
-pibrella.pin._add(d  = pibrella.input.d)
+	pibrella.pin._add(a  = pibrella.input.a)
+	pibrella.pin._add(b  = pibrella.input.b)
+	pibrella.pin._add(c  = pibrella.input.c)
+	pibrella.pin._add(d  = pibrella.input.d)
 
 # Lights
-pibrella.pin._add(red   = pibrella.light.red)
-pibrella.pin._add(yellow = pibrella.light.yellow)
-pibrella.pin._add(green = pibrella.light.green)
+	pibrella.pin._add(red   = pibrella.light.red)
+	pibrella.pin._add(yellow = pibrella.light.yellow)
+	pibrella.pin._add(green = pibrella.light.green)
 
 # Buzzer
-pibrella.pin._add(buzzer= pibrella.buzzer)
+	pibrella.pin._add(buzzer= pibrella.buzzer)
 
 # Button
-pibrella.pin._add(button = pibrella.button)
+	pibrella.pin._add(button = pibrella.button)
 
-pibrella.pins = pibrella.pin
+	pibrella.pins = pibrella.pin
 
 # Alias all the things!
 # This lets users "import pibrella" instead of "import pibrella from pibrella"
-pause = pibrella.pause
+	pause = pibrella.pause
 
 # Lets you register a function to loop
-loop = pibrella.loop
+	loop = pibrella.loop
 
 # Stops the loop
-stop = pibrella.stop
+	stop = pibrella.stop
 
 # IO
-light = pibrella.light
-lights = pibrella.lights
-input = pibrella.input
-inputs = pibrella.inputs
-output = pibrella.output
-outputs = pibrella.outputs
-button = pibrella.button
-buzzer = pibrella.buzzer
-pin = pibrella.pin
-pins = pibrella.pin
+	light = pibrella.light
+	lights = pibrella.lights
+	input = pibrella.input
+	inputs = pibrella.inputs
+	output = pibrella.output
+	outputs = pibrella.outputs
+	button = pibrella.button
+	buzzer = pibrella.buzzer
+	pin = pibrella.pin
+	pins = pibrella.pin
 
 # Aliases of input/output and light
-In = IN = input
-Out = OUT = output
-Led = LED = light
+	In = IN = input
+	Out = OUT = output
+	Led = LED = light
 
 # Advanced: Asyncronous function execution
-async_start = pibrella.async_start
-async_stop = pibrella.async_stop
-async_stop_all = pibrella.async_stop_all
+	async_start = pibrella.async_start
+	async_stop = pibrella.async_stop
+	async_stop_all = pibrella.async_stop_all
 
-set_timeout = pibrella.set_timeout
+	set_timeout = pibrella.set_timeout
+
+	ready = True
+except RuntimeError:
+	print("You must be root to use Pibrella!")
+	pibrella = None
+	ready = False
