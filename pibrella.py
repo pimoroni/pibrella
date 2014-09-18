@@ -242,6 +242,12 @@ class Pin(object):
 	def stop(self):
 		return True
 
+	def __enter__(self):
+		return self
+
+	def __exit__(self, type, value, traceback):
+		pass
+
 	is_high = is_on
 	is_low = is_off
 	get = read
