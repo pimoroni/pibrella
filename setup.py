@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Copyright (c) 2014 Pimoroni
 
@@ -33,7 +34,7 @@ classifiers = ['Development Status :: 4 - Beta',
                'Topic :: System :: Hardware']
 
 setup(name		= 'Pibrella',
-	version		= '1.1.6dev',
+	version		= '1.1.7dev',
 	author		= 'Philip Howard',
 	author_email	= 'phil@gadgetoid.com',
 	description	= 'A module to control the Pibrella Raspberry Pi Addon Board',
