@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+1.2
+---
+- Significant version bump to highlight launch to Production/Stable status
+- Small tweak to allow use of with, ie: "with pibrella.light.red as red:"
+
 1.1.7-dev
 ---------
 - Fixed buzzer to stop after playing melody

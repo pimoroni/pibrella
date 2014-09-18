@@ -23,7 +23,7 @@ SOFTWARE.
 
 from distutils.core import setup
 
-classifiers = ['Development Status :: 4 - Beta',
+classifiers = ['Development Status :: 5 - Production/Stable',
                'Operating System :: POSIX :: Linux',
                'License :: OSI Approved :: MIT License',
                'Intended Audience :: Developers',
@@ -34,7 +34,7 @@ classifiers = ['Development Status :: 4 - Beta',
                'Topic :: System :: Hardware']
 
 setup(name		= 'Pibrella',
-	version		= '1.1.7dev',
+	version		= '1.2',
 	author		= 'Philip Howard',
 	author_email	= 'phil@gadgetoid.com',
 	description	= 'A module to control the Pibrella Raspberry Pi Addon Board',
