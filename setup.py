@@ -43,6 +43,6 @@ setup(name		= 'Pibrella',
 	keywords	= 'Raspberry Pi Pibrella',
 	url		= 'http://www.pibrella.com',
 	classifiers     = classifiers,
-	py_modules	= ['pibrella'],
+	py_modules	= ['pibrella','pins'],
 	install_requires= ['rpi.gpio >= 0.5.5']
 )
