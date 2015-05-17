@@ -113,12 +113,12 @@ And you can write to the whole output collection simultaneously if you wish:
 
 Inputs are similar, except you're reading them instead of turning them on and off. To read a single input:
 
-    my_value = pibrella.input.e.read()
+    my_value = pibrella.input.a.read()
 
 Or to read all inputs into a dictionary:
 
     inputs = pibrella.input.read()
-    input_e = inputs['e']
+    input_a = inputs['a']
 
 
 The button
