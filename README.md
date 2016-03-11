@@ -9,15 +9,17 @@ Installation
 The easy way
 ------------
 
-**Python 3:**
+We've created a super-easy installation script that will install all pre-requisites and get your Pibrella up and running in a jiffy. To run it fire up Terminal which you'll find in Menu -> Accessories -> Terminal on your Raspberry Pi desktop like so:
 
-    sudo apt-get install python3-pip
-    sudo pip-3.2 install pibrella
+![Finding the terminal](terminal.jpg)
 
-**Python 2:**
+In the new terminal window type the following and follow the instructions:
 
-    sudo apt-get install python-pip
-    sudo pip install pibrella
+```bash
+curl -sS get.pimoroni.com/pibrella | bash
+```
+
+If you choose to download examples you'll find them in `/home/pi/Pimoroni/pibrella`, but you can also check out the examples for Pibrella in: [examples](examples)
 
 Alternative method
 ------------------
@@ -38,10 +40,7 @@ To try the examples:
 Usage
 =====
 
-Run as root!
-------------
-
-Pibrella depends upon RPi.GPIO > 0.5.4, which requires root to access your GPIO.
+Pibrella depends upon RPi.GPIO > 0.5.4, which requires root to access your GPIO. Newer versions do not have this requirement, so feel free to try with and without 'sudo' and see what works for you.
 
 If you're using an interactive shell you should: sudo python -i, otherwise sudo python yourscript.py
 
@@ -187,13 +186,13 @@ Quick Reference
 
 All of Pibrella's inputs, outputs and lights are stored in collectons. You can reference a pin by name or by index in one of three ways:
 
-	pibrella.light[0]		# By index
-	pibrella.light['red']		# By name, for use with a variable
-	pibrella.light.red		# By name
+    pibrella.light[0]        # By index
+    pibrella.light['red']    # By name, for use with a variable
+    pibrella.light.red       # By name
 
 You can also refer to a whole collection at once, simply by omitting the index or name:
-	
-	pibrella.light
+
+    pibrella.light
 
 Help Text
 ---------
@@ -209,17 +208,17 @@ Lights
 
 The following methods are available for every Pibrella light:
 
-	.on()	# Turn a light on
-	.off()	# Turn a light off
-	.high()	# Same as on
-	.low() 	# Same as off
+    .on()       # Turn a light on
+    .off()      # Turn a light off
+    .high()     # Same as on
+    .low()      # Same as off
 
-	.toggle() # Toggle a lights status from on to off and off to on
-	# If lights are pulsing/blinking toggle will always turn them off
+    .toggle() # Toggle a lights status from on to off and off to on
+    # If lights are pulsing/blinking toggle will always turn them off
 
-	.pulse( transition_on, transition_off, time_on, time_off )	# Pulse a light, values in seconds
-	.blink( time_on, time_off )	# Blink a light, values in seconds
-	.write( value )	# Turn on if value = 1, or off if value = 0
+    .pulse( transition_on, transition_off, time_on, time_off )    # Pulse a light, values in seconds
+    .blink( time_on, time_off )     # Blink a light, values in seconds
+    .write( value )                 # Turn on if value = 1, or off if value = 0
 
 Outputs
 -------
@@ -234,10 +233,10 @@ The following methods are available for every Pibrella input:
 General
 -------
 
-	pibrella.pause() # Wrapper for signal.pause(), great for pausing your application after calling blink, pulse or loop
+    pibrella.pause() # Wrapper for signal.pause(), great for pausing your application after calling blink, pulse or loop
 
-	pibrella.loop( function_name )  # Pass pibrella a function to run over and over again, asyncronously
-	# You must call pibrella.pause() after giving it a function to loop, or your code will simply exit!
+    pibrella.loop( function_name )  # Pass pibrella a function to run over and over again, asyncronously
+    # You must call pibrella.pause() after giving it a function to loop, or your code will simply exit!
 
 
 
