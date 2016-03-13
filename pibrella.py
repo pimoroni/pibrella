@@ -498,7 +498,7 @@ class Buzzer(Output):
             note = notes[int(delta)-1]
             
             
-            if is_notation:
+            if not is_notation:
                 # this note and above would be OVER NINE THOUSAND Hz!
                 # Treat it as an explicit pitch instead
                 if note == 0:
