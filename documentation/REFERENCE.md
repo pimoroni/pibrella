@@ -1,44 +1,4 @@
-Pibrella
-========
-
-Support code and API library for the Pibrella addon board.
-
-Installation
-============
-
-The easy way
-------------
-
-We've created a super-easy installation script that will install all pre-requisites and get your Pibrella up and running in a jiffy. To run it fire up Terminal which you'll find in Menu -> Accessories -> Terminal on your Raspberry Pi desktop like so:
-
-![Finding the terminal](terminal.jpg)
-
-In the new terminal window type the following and follow the instructions:
-
-```bash
-curl -sS get.pimoroni.com/pibrella | bash
-```
-
-If you choose to download examples you'll find them in `/home/pi/Pimoroni/pibrella`, but you can also check out the examples for Pibrella in: [examples](examples)
-
-Alternative method
-------------------
-
-Alternatively you can clone this repository and install:
-
-    git clone http://github.com/pimoroni/pibrella
-    cd pibrella
-    sudo python setup.py install
-
-To try the examples:
-
-    git clone http://github.com/pimoroni/pibrella
-    cd pibrella/examples
-    sudo python siren.py
-
-
-Usage
-=====
+#Pibrella Function Reference
 
 Pibrella depends upon RPi.GPIO > 0.5.4, which requires root to access your GPIO. Newer versions do not have this requirement, so feel free to try with and without 'sudo' and see what works for you.
 
@@ -237,6 +197,3 @@ General
 
     pibrella.loop( function_name )  # Pass pibrella a function to run over and over again, asyncronously
     # You must call pibrella.pause() after giving it a function to loop, or your code will simply exit!
-
-
-
