@@ -44,5 +44,5 @@ setup(name		= 'Pibrella',
 	url		= 'http://www.pibrella.com',
 	classifiers     = classifiers,
 	py_modules	= ['pibrella','pins'],
-	install_requires= ['rpi.gpio >= 0.5.5']
+	install_requires= []
 )
