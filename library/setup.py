@@ -21,7 +21,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from distutils.core import setup
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
 classifiers = ['Development Status :: 5 - Production/Stable',
                'Operating System :: POSIX :: Linux',
@@ -34,15 +37,15 @@ classifiers = ['Development Status :: 5 - Production/Stable',
                'Topic :: System :: Hardware']
 
 setup(name		= 'Pibrella',
-	version		= '1.2',
+	version		= '1.3',
 	author		= 'Philip Howard',
 	author_email	= 'phil@gadgetoid.com',
 	description	= 'A module to control the Pibrella Raspberry Pi Addon Board',
-	long_description= open('README.md').read() + open('CHANGELOG.txt').read(),
+	long_description= open('README.txt').read() + open('CHANGELOG.txt').read(),
 	license		= 'MIT',
 	keywords	= 'Raspberry Pi Pibrella',
 	url		= 'http://www.pibrella.com',
 	classifiers     = classifiers,
-	py_modules	= ['pibrella','pins'],
-	install_requires= ['rpi.gpio >= 0.5.5']
+        packages        = ['pibrella'],
+	install_requires= []
 )
