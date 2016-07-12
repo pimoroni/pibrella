@@ -6,7 +6,7 @@ API library for the Pibrella, a Raspberry Pi add-on board
 """
 import sys, time, threading, signal, atexit
 
-from pins import ObjectCollection, StoppableThread, AsyncWorker
+from .pins import ObjectCollection, StoppableThread, AsyncWorker
 
 try:
     import thread
