@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 This example will blink an LED at random
 """
