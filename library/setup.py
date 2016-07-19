@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 """
 Copyright (c) 2014 Pimoroni
 
@@ -36,16 +37,17 @@ classifiers = ['Development Status :: 5 - Production/Stable',
                'Topic :: Software Development',
                'Topic :: System :: Hardware']
 
-setup(name		= 'Pibrella',
-	version		= '1.3.1',
-	author		= 'Philip Howard',
-	author_email	= 'phil@gadgetoid.com',
-	description	= 'A module to control the Pibrella Raspberry Pi Addon Board',
-	long_description= open('README.txt').read() + open('CHANGELOG.txt').read(),
-	license		= 'MIT',
-	keywords	= 'Raspberry Pi Pibrella',
-	url		= 'http://www.pibrella.com',
-	classifiers     = classifiers,
-        packages        = ['pibrella'],
-	install_requires= []
+setup(
+    name            = 'Pibrella',
+    version         = '1.3.1',
+    author          = 'Philip Howard',
+    author_email    = 'phil@gadgetoid.com',
+    description     = 'A module to control the Pibrella Raspberry Pi Addon Board',
+    long_description= open('README.txt').read() + open('CHANGELOG.txt').read(),
+    license         = 'MIT',
+    keywords        = 'Raspberry Pi Pibrella',
+    url             = 'http://www.pibrella.com',
+    classifiers     = classifiers,
+    packages        = ['pibrella'],
+    install_requires= []
 )

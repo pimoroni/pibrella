@@ -1,2 +1,1 @@
-Pibrella API Library.
-See README.md for details.
+Learn more: http://pibrella.com
