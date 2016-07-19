@@ -1,0 +1,31 @@
+Source: pibrella
+Maintainer: Phil Howard <phil@pimoroni.com>
+Homepage: https://github.com/pimoroni/pibrella
+Section: python
+Priority: optional
+Build-Depends: debhelper (>= 9.0.0), dh-python, python-all (>= 2.7), python-setuptools, python3-all (>= 3.4), python3-setuptools
+Standards-Version: 3.9.6
+X-Python-Version: >= 2.7
+X-Python3-Version: >= 3.4
+
+Package: python-pibrella
+Architecture: all
+Section: python
+Depends: ${misc:Depends}, ${python:Depends}, python-rpi.gpio
+Description: python library designed to drive Pibrella.
+ Pibrella provides a handy collection of inputs and outputs.
+ It even has a USB power connector so it can deliver more juice to motors,
+ relays and solenoids connected to the outputs. 
+ .
+ This is the Python 2 version of the package.
+
+Package: python3-pibrella
+Architecture: all
+Section: python
+Depends: ${misc:Depends}, ${python3:Depends}, python3-rpi.gpio
+Description: python library designed to drive Pibrella.
+ Pibrella provides a handy collection of inputs and outputs.
+ It even has a USB power connector so it can deliver more juice to motors,
+ relays and solenoids connected to the outputs. 
+ .
+ This is the Python 3 version of the package.
