@@ -1,0 +1,6 @@
+README
+
+Pibrella provides a handy collection of inputs and outputs. It even has a USB power connector so it can deliver more juice to motors, relays and solenoids connected to the outputs.
+
+Learn more: http://pibrella.com
+For examples run: `curl -sS get.pimoroni.com/pibrella | bash`

@@ -1,58 +1,72 @@
-Change Log
-==========
+1.3.1
+-----
 
-1.3
----
-- Restructured library to include pins/main code in Pibrella package
-- Fix to notation support so notes are correctly played
+* Fixed Manifest
 
-1.2
----
-- Significant version bump to highlight launch to Production/Stable status
-- Small tweak to allow use of with, ie: "with pibrella.light.red as red:"
+1.3.0
+-----
 
-1.1.7-dev
----------
-- Fixed buzzer to stop after playing melody
-- Wrapped changed/pressed/released so they can be registered simultaneously
-- Added "len" to pin collections, to support random.choice(pibrella.light)
-- Added error if run without root
+* Restructured library to include pins/main code in Pibrella package
+* Fix to notation support so notes are correctly played
 
-1.1.6-dev
----------
-- Populated LICENSE.txt
+1.2.0
+-----
 
-1.1.5-dev
----------
-- Renamed amber to yellow and added alias support for backwards-compatibility
-- Added lights, inputs, outputs and pins as pluralalised aliases for light, input etc
-- Tweaked how on/off/toggle calls to lights/outputs are handled during pulse/blink
+* Significant version bump to highlight launch to Production/Stable status
+* Small tweak to allow use of with, ie: "with pibrella.light.red as red:"
 
-1.1.4-dev
----------
-- Added pulse(), blink() and fade() to all outputs
+1.1.7
+-----
 
-1.1.3-dev
----------
-- Built-in asyncronous alarm sound! pibrella.buzzer.alarm()
-- Replaced xrange with range
+* Fixed buzzer to stop after playing melody
+* Wrapped changed/pressed/released so they can be registered simultaneously
+* Added "len" to pin collections, to support random.choice(pibrella.light)
+* Added error if run without root
 
-1.1.2-dev
----------
-- Added support for REV 1 Raspberry Pi
+1.1.6
+-----
 
-1.1.1-dev
----------
-- Added fade(from,to,duration) for lights
+* Populated LICENSE.txt
 
-1.1-dev
--------
-- Removed *.all.* keyword, use pibrella.input.read() instead of pibrella.input.all.read()
-- Added helper to list pins, try: pibrella.input in interactive shell
-- Added ['name'] and [idx] support to pin collections, try: pibrella.input[0] pibrella.input['a']
-- Added buzzer to pibrella.pin
-- Added return values to most methods
+1.1.5
+-----
 
-1.0-dev
--------
-- Initial development/beta release
+* Renamed amber to yellow and added alias support for backwards-compatibility
+* Added lights, inputs, outputs and pins as pluralalised aliases for light, input etc
+* Tweaked how on/off/toggle calls to lights/outputs are handled during pulse/blink
+
+1.1.4
+-----
+
+* Added pulse(), blink() and fade() to all outputs
+
+1.1.3
+-----
+
+* Built-in asyncronous alarm sound! pibrella.buzzer.alarm()
+* Replaced xrange with range
+
+1.1.2
+-----
+
+* Added support for REV 1 Raspberry Pi
+
+1.1.1
+-----
+
+* Added fade(from,to,duration) for lights
+
+1.1.0
+-----
+
+* Removed *.all.* keyword, use pibrella.input.read() instead of pibrella.input.all.read()
+* Added helper to list pins, try: pibrella.input in interactive shell
+* Added ['name'] and [idx] support to pin collections, try: pibrella.input[0] pibrella.input['a']
+* Added buzzer to pibrella.pin
+* Added return values to most methods
+
+1.0.0
+-----
+
+* Initial development/beta release
+
