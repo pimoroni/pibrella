@@ -49,5 +49,5 @@ setup(
     url             = 'http://www.pibrella.com',
     classifiers     = classifiers,
     packages        = ['pibrella'],
-    install_requires= []
+    install_requires= [ 'RPi.GPIO' ]
 )
