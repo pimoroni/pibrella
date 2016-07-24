@@ -1,9 +1,14 @@
 #!/usr/bin/env python
 
-import os,sys
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
+import os
+import signal
+import sys
+import time
 
-import pibrella, time, signal
+import pibrella
+
+
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
 # Pulse all of the lights
 
@@ -17,37 +22,37 @@ FADE_OFF = 0.2
 siren_stopped = True
 
 def siren():
-	if siren_stopped == True:
-		pibrella.buzzer.stop()
-		return True
-	for x in xrange(-30,30,2):
-		pibrella.buzzer.note(x)
-		time.sleep(0.01)
-	for x in reversed(xrange(-30,30,2)):
-		pibrella.buzzer.note(x)
-		time.sleep(0.01)
+    if siren_stopped == True:
+        pibrella.buzzer.stop()
+        return True
+    for x in xrange(-30,30,2):
+        pibrella.buzzer.note(x)
+        time.sleep(0.01)
+    for x in reversed(xrange(-30,30,2)):
+        pibrella.buzzer.note(x)
+        time.sleep(0.01)
 
 
 pibrella.async_start('siren',siren)
 
 def start_siren():
-	global siren_stopped
-	siren_stopped = False
-	pibrella.light.pulse(TIME_ON, TIME_OFF, FADE_ON, FADE_OFF)
+    global siren_stopped
+    siren_stopped = False
+    pibrella.light.pulse(TIME_ON, TIME_OFF, FADE_ON, FADE_OFF)
 
 def stop_siren():
-	global siren_stopped
-	siren_stopped = True
-	pibrella.light.stop()
+    global siren_stopped
+    siren_stopped = True
+    pibrella.light.stop()
 
 def handle_button(button):
-	global siren_stopped
-	if siren_stopped == True:
-		start_siren()
-		print "Starting Siren"
-	else:
-		stop_siren()
-		print "Stopping Siren"
+    global siren_stopped
+    if siren_stopped == True:
+        start_siren()
+        print "Starting Siren"
+    else:
+        stop_siren()
+        print "Stopping Siren"
 
 pibrella.button.released(handle_button)
 
