@@ -4,16 +4,25 @@
 
 API library for the Pibrella, a Raspberry Pi add-on board
 """
-import sys, time, threading, signal, atexit
 
-from .pins import ObjectCollection, StoppableThread, AsyncWorker
+import atexit
+import signal
+import sys
+import threading
+import time
 
 try:
     import thread
 except ImportError:
     import _thread as thread
 
-import RPi.GPIO as GPIO
+try:
+    import RPi.GPIO as GPIO
+except ImportError:
+    exit("This library requires the RPi.GPIO module\nInstall with: sudo pip install RPi.GPIO")
+
+from .pins import ObjectCollection, StoppableThread, AsyncWorker
+
 
 # Pibrella pins, these are BCM
 if GPIO.RPI_REVISION == 1:
