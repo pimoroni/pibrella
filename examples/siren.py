@@ -49,10 +49,10 @@ def handle_button(button):
     global siren_stopped
     if siren_stopped == True:
         start_siren()
-        print "Starting Siren"
+        print("Starting Siren")
     else:
         stop_siren()
-        print "Stopping Siren"
+        print("Stopping Siren")
 
 pibrella.button.released(handle_button)
 
