@@ -533,7 +533,7 @@ class Buzzer(Output):
         # Play all notes from -30 to 30
         # with a note duration of 0.01sec
         # and, boom, we have an alarm!
-        self.melody(['N'] + range(-30,30),0.01)
+        self.melody(['N'] + list(range(-30,30)),0.01)
 
     def notes(self,notation,speed=0.5):
         import re
