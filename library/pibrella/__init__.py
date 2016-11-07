@@ -7,9 +7,9 @@ API library for the Pibrella, a Raspberry Pi add-on board
 
 import atexit
 import signal
-import sys
 import threading
 import time
+from sys import exit
 
 try:
     import thread
@@ -22,6 +22,8 @@ except ImportError:
     exit("This library requires the RPi.GPIO module\nInstall with: sudo pip install RPi.GPIO")
 
 from .pins import ObjectCollection, StoppableThread, AsyncWorker
+
+__version__ = '1.3.1'
 
 
 # Pibrella pins, these are BCM
