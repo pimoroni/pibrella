@@ -465,12 +465,12 @@ class Buzzer(Output):
     # Example sound effects
     def success(self):
         # Repeat the last note to extend its duration
-        self.melody([0,1,2,3,3,3,3,3],0.2,False)
+        self.melody(['N',0,1,2,3,3,3,3,3],0.2,False)
         return True
 
     def fail(self):
         # Repeat the last note to extend its duration
-        self.melody([5,4,3,2,1,1,1,1,1],0.2,False)
+        self.melody(['N',5,4,3,2,1,1,1,1,1],0.2,False)
         return True
 
     def melody(self,notes,duration = 0.5,loop = True):
@@ -535,7 +535,7 @@ class Buzzer(Output):
         # Play all notes from -30 to 30
         # with a note duration of 0.01sec
         # and, boom, we have an alarm!
-        self.melody(range(-30,30),0.01)
+        self.melody(['N'] + list(range(-30,30)),0.01)
 
     def notes(self,notation,speed=0.5):
         import re
