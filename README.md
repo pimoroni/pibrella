@@ -159,6 +159,10 @@ For example:
         print("You pressed the button!")
 
     pibrella.button.pressed(button_pressed)
+    
+    pibrella.pause()
+
+The `pibrella.pause()` command is included to prevent your program exiting immediately, since the events are handled in the background there's otherwise nothing to keep your program busy.
 
 The "pin" parameter of the button pressed function is the Pibrella pin that triggered the event, in this case "pin" will be equal to "pibrella.button" so you can .read() it.
 
@@ -169,6 +173,8 @@ The "pin" parameter of the button pressed function is the Pibrella pin that trig
             print("You released the button!")
 
     pibrella.button.changed(button_changed)
+    
+    pibrella.pause()
 
 If you want to turn a light on when the button is pressed, your code should look something like this:
 
@@ -178,8 +184,10 @@ If you want to turn a light on when the button is pressed, your code should look
         pibrella.light.red.write(pin.read())
 
     pibrella.button.changed(button_changed)
+    
+    pibrella.pause()
 
-And in just 4 lines, you've got started with event-driven programming!
+And in just 5 lines, you've got started with event-driven programming!
 
 Quick Reference
 ===============
