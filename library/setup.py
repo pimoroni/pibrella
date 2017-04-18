@@ -39,7 +39,7 @@ classifiers = ['Development Status :: 5 - Production/Stable',
 
 setup(
     name            = 'Pibrella',
-    version         = '1.3.1',
+    version         = '1.4.0',
     author          = 'Philip Howard',
     author_email    = 'phil@gadgetoid.com',
     description     = 'A module to control the Pibrella Raspberry Pi Addon Board',
