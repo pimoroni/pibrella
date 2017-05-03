@@ -13,7 +13,7 @@ Architecture: all
 Section: python
 Depends: ${misc:Depends}, ${python:Depends}, python-rpi.gpio
 Suggests: python-gpiozero
-Description: python library designed to drive Pibrella.
+Description: Python library for the Pimoroni/Cyntech Pibrella.
  Pibrella provides a handy collection of inputs and outputs.
  It even has a USB power connector so it can deliver more juice to motors,
  relays and solenoids connected to the outputs. 
@@ -25,7 +25,7 @@ Architecture: all
 Section: python
 Depends: ${misc:Depends}, ${python3:Depends}, python3-rpi.gpio
 Suggests: python3-gpiozero
-Description: python library designed to drive Pibrella.
+Description: Python library for the Pimoroni/Cyntech Pibrella.
  Pibrella provides a handy collection of inputs and outputs.
  It even has a USB power connector so it can deliver more juice to motors,
  relays and solenoids connected to the outputs. 
