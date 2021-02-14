@@ -793,7 +793,8 @@ try:
     set_timeout = pibrella.set_timeout
 
     ready = True
-except RuntimeError:
+except RuntimeError as e:
     print("You must be root to use Pibrella!")
     pibrella = None
     ready = False
+    raise(e)
