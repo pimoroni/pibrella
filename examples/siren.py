@@ -7,6 +7,12 @@ import time
 
 import pibrella
 
+try:
+    # Python3 does not have xrange
+    type(xrange)
+except NameError:
+    xrange = range
+
 
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
