@@ -35,7 +35,7 @@ class TestBBInput(unittest.TestCase):
 
         pibrella.output.f.write(1)
         self.assertEqual(pibrella.output.f.read(),1)
-        
+
         pibrella.output.g.write(1)
         self.assertEqual(pibrella.output.g.read(),1)
 

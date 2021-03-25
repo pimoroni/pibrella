@@ -23,7 +23,7 @@ except ImportError:
 
 from .pins import ObjectCollection, StoppableThread, AsyncWorker
 
-__version__ = '1.4.0'
+__version__ = '1.4.1'
 
 
 # Pibrella pins, these are BCM
@@ -84,7 +84,7 @@ class Pulse(StoppableThread):
         StoppableThread.start(self)
 
     def run(self):
-        # This loop runs at the specified "FPS" uses time.time() 
+        # This loop runs at the specified "FPS" uses time.time()
         while self.stop_event.is_set() == False:
             current_time = time.time() - self.time_start
             delta = current_time % (self.transition_on+self.time_on+self.transition_off+self.time_off)
@@ -193,7 +193,7 @@ class Input(Pin):
         self.handle_released = callback
         self._setup_callback(bouncetime)
         return True
-        
+
     def on_changed(self, callback, bouncetime=DEBOUNCE_TIME):
         self.handle_changed = callback
         self._setup_callback(bouncetime)
@@ -229,7 +229,7 @@ class Button(Input):
 #
 #  Output contains methods that
 #  apply only to outputs
-#  It also contains methods for pulsing, 
+#  It also contains methods for pulsing,
 #  blinking LEDs or other attached devices
 class Output(Pin):
 
@@ -254,12 +254,12 @@ class Output(Pin):
             if time.time() - time_start >= duration:
                 self.duty_cycle(end)
                 return False
-            
+
             current = (time.time() - time_start) / duration
             brightness = start + (float(end-start) * current)
             self.duty_cycle(round(brightness))
             time.sleep(0.1)
-            
+
         self.fader = AsyncWorker(_fade)
         self.fader.start()
         return True
@@ -292,7 +292,7 @@ class Output(Pin):
             self.blinking = True
 
         return True
-    
+
     ## Pulses an LED
     #  @param self Object pointer.
     #  @param transition_on Time the transition from 0% to 100% brightness should take
@@ -431,7 +431,7 @@ class Output(Pin):
 
 ## Pibrella class representing an onboard LED
 #
-# 
+#
 class Light(Output):
 
     type = 'Light'
@@ -495,7 +495,7 @@ class Buzzer(Output):
         def melody():
 
             now = time.time() - time_start
-            
+
             # Play only once if loop is false
             if loop == False and int(now / total) > 0:
                 self._stop_buzzer()
@@ -504,11 +504,11 @@ class Buzzer(Output):
             # Figure out how far we are into the current iteration
             # Then divide by duration to find the current note index
             delta = round( (now % total) / duration )
-            
+
             # Select the note from the notes array
             note = notes[int(delta)-1]
-            
-            
+
+
             if not is_notation:
                 # this note and above would be OVER NINE THOUSAND Hz!
                 # Treat it as an explicit pitch instead
@@ -522,7 +522,7 @@ class Buzzer(Output):
                 else:
                     # Play the note
                     pibrella.buzzer.note(note)
-    
+
             # Sleep a bit
             time.sleep(0.0001)
 

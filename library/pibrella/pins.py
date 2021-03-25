@@ -10,7 +10,7 @@ class StoppableThread(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
         self.stop_event = threading.Event()
-        self.daemon = True         
+        self.daemon = True
 
     def start(self):
         if self.is_alive() == False:

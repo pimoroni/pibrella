@@ -35,7 +35,7 @@ Blinking and pulsing LEDs
 
 Lights aren't simply there for toggling on and off. Any good lighting display needs pulsing, fading, blinking and strobing. Pibrella has functions for those, too:
 
-    pibrella.light.red.blink(ON_TIME, OFF_TIME) 
+    pibrella.light.red.blink(ON_TIME, OFF_TIME)
 
 And something more exciting:
 
@@ -97,7 +97,7 @@ The buzzer is just another output. However just turning it on and off wont get y
 First, you can buzz at a specific frequency:
 
     pibrella.buzzer.buzz( frequency )
-    
+
 Or play a note ( you can use both positive and negative values here, with 0 being A at 440Hz )
 
     pibrella.buzzer.note( 1 )

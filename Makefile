@@ -1,6 +1,6 @@
 LIBRARY_VERSION=$(shell grep version library/setup.cfg | awk -F" = " '{print $$2}')
 LIBRARY_NAME=$(shell grep name library/setup.cfg | awk -F" = " '{print $$2}')
-PACKAGE_NAME="bme280"
+PACKAGE_NAME=${LIBRARY_NAME}
 
 .PHONY: usage install uninstall
 usage:

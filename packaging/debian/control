@@ -16,7 +16,7 @@ Suggests: python-gpiozero
 Description: Python library for the Pimoroni/Cyntech Pibrella.
  Pibrella provides a handy collection of inputs and outputs.
  It even has a USB power connector so it can deliver more juice to motors,
- relays and solenoids connected to the outputs. 
+ relays and solenoids connected to the outputs.
  .
  This is the Python 2 version of the package.
 
@@ -28,6 +28,6 @@ Suggests: python3-gpiozero
 Description: Python library for the Pimoroni/Cyntech Pibrella.
  Pibrella provides a handy collection of inputs and outputs.
  It even has a USB power connector so it can deliver more juice to motors,
- relays and solenoids connected to the outputs. 
+ relays and solenoids connected to the outputs.
  .
  This is the Python 3 version of the package.
