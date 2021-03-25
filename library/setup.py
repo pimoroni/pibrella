@@ -1,7 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
-Copyright (c) 2014 Pimoroni
+Copyright (c) 2021 Pimoroni
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -22,32 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import setup, __version__
+from pkg_resources import parse_version
 
-classifiers = ['Development Status :: 5 - Production/Stable',
-               'Operating System :: POSIX :: Linux',
-               'License :: OSI Approved :: MIT License',
-               'Intended Audience :: Developers',
-               'Programming Language :: Python :: 2.6',
-               'Programming Language :: Python :: 2.7',
-               'Programming Language :: Python :: 3',
-               'Topic :: Software Development',
-               'Topic :: System :: Hardware']
+minimum_version = parse_version('30.4.0')
 
-setup(
-    name            = 'Pibrella',
-    version         = '1.4.0',
-    author          = 'Philip Howard',
-    author_email    = 'phil@gadgetoid.com',
-    description     = 'A module to control the Pibrella Raspberry Pi Addon Board',
-    long_description= open('README.txt').read() + open('CHANGELOG.txt').read(),
-    license         = 'MIT',
-    keywords        = 'Raspberry Pi Pibrella',
-    url             = 'http://www.pibrella.com',
-    classifiers     = classifiers,
-    packages        = ['pibrella'],
-    install_requires= [ 'RPi.GPIO' ]
-)
+if parse_version(__version__) < minimum_version:
+    raise RuntimeError("Package setuptools must be at least version {}".format(minimum_version))
+
+setup()
