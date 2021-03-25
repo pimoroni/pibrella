@@ -1,3 +1,9 @@
+1.4.1
+-----
+
+* Fixes for Python 3
+* Repackaging with setup.cfg
+
 1.4.0
 -----
 
